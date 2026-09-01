@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   FileDown,
   Share2,
-  Sparkles,
-  Bot,
   Eye,
   SlidersHorizontal,
   ChevronDown,
@@ -12,7 +10,6 @@ import {
   Mail,
   Copy,
   Check,
-  ShieldCheck,
 } from 'lucide-react';
 import { api } from '../../lib/api.ts';
 import type { FullProfileData, CVVersion, TemplateType } from '../../types/index.ts';
@@ -21,7 +18,6 @@ import { ExecutiveSerifTemplate } from '../templates/ExecutiveSerifTemplate.tsx'
 import { TechTerminalTemplate } from '../templates/TechTerminalTemplate.tsx';
 import { BentoGridTemplate } from '../templates/BentoGridTemplate.tsx';
 import { MinimalistLineTemplate } from '../templates/MinimalistLineTemplate.tsx';
-import { RecruiterAssistantWidget } from './RecruiterAssistantWidget.tsx';
 import { QRShareModal } from './QRShareModal.tsx';
 import { generatePDFResume } from '../../lib/pdfGenerator.ts';
 
@@ -41,11 +37,10 @@ export const PublicCVPage: React.FC<PublicCVPageProps> = ({
   const [profileData, setProfileData] = useState<FullProfileData | null>(null);
   const [activeVersionSlug, setActiveVersionSlug] = useState<string>(initialVersionSlug || 'general');
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('modern-clean');
-  const [recruiterMode, setRecruiterMode] = useState<boolean>(false);
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
-  const [showContactModal, setShowContactModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [showContactModal, setShowContactModal] = useState<boolean>(false);
 
   useEffect(() => {
     loadPublicProfile();
@@ -181,20 +176,6 @@ export const PublicCVPage: React.FC<PublicCVPageProps> = ({
 
           {/* Right Action Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Recruiter Mode Toggle */}
-            <button
-              onClick={() => setRecruiterMode(!recruiterMode)}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                recruiterMode
-                  ? 'bg-amber-950/60 border-amber-500 text-amber-300 shadow-md shadow-amber-500/20'
-                  : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
-              }`}
-              title="Toggle Recruiter Evaluation Mode"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Recruiter Mode</span>
-            </button>
-
             {/* Template Selector (In owner preview mode only) */}
             {previewMode && (
               <div className="hidden lg:flex items-center gap-1 bg-neutral-900 border border-neutral-800 rounded-xl p-1 text-xs">
@@ -232,29 +213,6 @@ export const PublicCVPage: React.FC<PublicCVPageProps> = ({
           </div>
         </div>
       </header>
-
-      {/* Recruiter Mode Banner if active */}
-      {recruiterMode && (
-        <div className="bg-gradient-to-r from-amber-950/60 via-neutral-900 to-amber-950/60 border-b border-amber-800/60 py-3 px-4 text-center">
-          <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2 text-amber-300 font-semibold">
-              <ShieldCheck className="w-4 h-4 text-amber-400" />
-              <span>Recruiter Evaluation Mode Active</span>
-            </div>
-            <div className="flex items-center gap-4 text-neutral-300">
-              <span>Verified Experience: <strong>{profileData.experiences.length} roles</strong></span>
-              <span>Skills Matrix: <strong>{profileData.skills.length} skills</strong></span>
-              <span>Key Projects: <strong>{profileData.projects.length} repositories</strong></span>
-            </div>
-            <button
-              onClick={handleDownloadPDF}
-              className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold"
-            >
-              Export ATS Formatted PDF
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Main Digital CV Content Canvas */}
       <main className="flex-1 py-10 px-4 sm:px-6 lg:px-8">
@@ -298,22 +256,12 @@ export const PublicCVPage: React.FC<PublicCVPageProps> = ({
       {/* Bottom Footer */}
       <footer className="border-t border-neutral-900 py-8 text-center text-xs text-neutral-500">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 px-4">
-          <p>© {new Date().getFullYear()} {profileData.profile.fullName}. Powered by DigitalCV Platform.</p>
-          <div className="flex items-center gap-4">
-            <span className="text-neutral-400">Database Source of Truth</span>
-            <span className="text-neutral-600">•</span>
-            <span className="text-indigo-400">Strict Fact Integrity</span>
+          <p>© {new Date().getFullYear()} {profileData.profile.fullName}.</p>
+          <div className="flex items-center gap-2 text-neutral-400">
+            <span>Interactive Digital Portfolio</span>
           </div>
         </div>
       </footer>
-
-      {/* Embedded Grounded Recruiter AI Assistant */}
-      <RecruiterAssistantWidget
-        candidateProfile={profileData}
-        username={username}
-        versionSlug={activeVersionSlug}
-        defaultOpen={recruiterMode}
-      />
 
       {/* QR Share Modal */}
       <QRShareModal

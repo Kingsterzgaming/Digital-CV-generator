@@ -85,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="space-y-6">
         <div className="space-y-1">
           <p className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-            CV Data Engine (DB)
+            CV Sections
           </p>
           <nav className="space-y-1">
             {navItems.map(item => {
@@ -144,17 +144,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Database Status Indicator */}
+      {/* Profile Status Indicator */}
       <div className="p-3 rounded-xl bg-neutral-900/40 border border-neutral-800/80 text-[11px] space-y-1">
         <div className="flex items-center justify-between text-neutral-400">
-          <span>Database State</span>
+          <span>Digital CV</span>
           <span className="flex items-center gap-1 text-emerald-400 font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Synced
+            Live & Active
           </span>
         </div>
         <p className="text-neutral-400 text-[10px]">
-          Source of truth: confirmed PostgreSQL records.
+          Changes reflect immediately across templates.
         </p>
       </div>
     </aside>

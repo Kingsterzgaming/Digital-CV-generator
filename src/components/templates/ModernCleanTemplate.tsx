@@ -33,17 +33,19 @@ export const ModernCleanTemplate: React.FC<TemplateProps> = ({
   const headline = activeVersion?.customHeadline || profile.headline;
   const summary = activeVersion?.customSummary || profile.summary;
 
-  // Filter items by version
-  let experiences = data.experiences;
-  let projects = data.projects;
-  let skills = data.skills;
+  // Filter items by version (safely fallback to all items if filtered array is empty)
+  let experiences = data.experiences || [];
+  let projects = data.projects || [];
+  let skills = data.skills || [];
 
-  if (activeVersion) {
+  if (activeVersion && activeVersion.slug !== 'general' && !activeVersion.isDefault) {
     if (activeVersion.selectedExperienceIds?.length) {
-      experiences = data.experiences.filter(e => activeVersion.selectedExperienceIds.includes(e.id));
+      const filtered = data.experiences.filter(e => activeVersion.selectedExperienceIds.includes(e.id));
+      if (filtered.length > 0) experiences = filtered;
     }
     if (activeVersion.selectedProjectIds?.length) {
-      projects = data.projects.filter(p => activeVersion.selectedProjectIds.includes(p.id));
+      const filtered = data.projects.filter(p => activeVersion.selectedProjectIds.includes(p.id));
+      if (filtered.length > 0) projects = filtered;
     }
   }
 
@@ -323,6 +325,53 @@ export const ModernCleanTemplate: React.FC<TemplateProps> = ({
               </div>
             </div>
           )}
+        </section>
+      )}
+
+      {/* Honors, Awards & Achievements */}
+      {data.achievements && data.achievements.length > 0 && (
+        <section className="space-y-4 pt-2">
+          <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-indigo-400">
+            <Sparkles className="w-4 h-4" />
+            <span>Honors & Achievements</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {data.achievements.map(ach => (
+              <div key={ach.id} className="p-4 rounded-xl bg-neutral-900/40 border border-neutral-800 space-y-1">
+                <div className="flex justify-between items-start">
+                  <h4 className="font-bold text-sm text-white">{ach.title}</h4>
+                  {ach.date && <span className="text-[11px] font-mono text-neutral-400">{ach.date}</span>}
+                </div>
+                <p className="text-xs text-neutral-300 leading-relaxed">{ach.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Publications & Research */}
+      {data.publications && data.publications.length > 0 && (
+        <section className="space-y-4 pt-2">
+          <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-indigo-400">
+            <BookOpen className="w-4 h-4" />
+            <span>Publications & Research</span>
+          </div>
+          <div className="space-y-3">
+            {data.publications.map(pub => (
+              <div key={pub.id} className="p-4 rounded-xl bg-neutral-900/40 border border-neutral-800 space-y-1">
+                <div className="flex justify-between items-start">
+                  <h4 className="font-bold text-sm text-white">{pub.title}</h4>
+                  {pub.date && <span className="text-[11px] font-mono text-neutral-400">{pub.date}</span>}
+                </div>
+                <p className="text-xs text-indigo-400 font-medium">{pub.publisher}</p>
+                {pub.url && (
+                  <a href={pub.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[11px] text-neutral-400 hover:text-indigo-300">
+                    <ExternalLink className="w-3 h-3" /> View Publication
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
         </section>
       )}
     </div>

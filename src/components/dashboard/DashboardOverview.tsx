@@ -261,26 +261,30 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
         </div>
 
-        {/* Right: Source Document & Data Provenance */}
+        {/* Right: Active CV Profile & Export */}
         <div className="p-6 rounded-2xl bg-neutral-900/50 border border-neutral-800 space-y-4">
           <div className="flex items-center gap-2 text-sm font-bold text-white">
             <FileText className="w-4 h-4 text-emerald-400" />
-            <span>Database Source of Truth</span>
+            <span>Active CV Profile</span>
           </div>
           <div className="p-3.5 rounded-xl bg-neutral-950 border border-neutral-800 space-y-2 text-xs">
             <div className="flex justify-between text-neutral-400">
               <span>Source File:</span>
               <span className="text-white font-medium truncate max-w-[200px]">
-                {profile.originalCvFileName || 'Initial Onboarding CV'}
+                {profile.originalCvFileName || 'Imported CV'}
               </span>
             </div>
             <div className="flex justify-between text-neutral-400">
-              <span>Storage Backend:</span>
-              <span className="text-emerald-400 font-mono font-semibold">PostgreSQL Relational Entities</span>
+              <span>Verified Sections:</span>
+              <span className="text-emerald-400 font-semibold">
+                {profile.experiences?.length || 0} Roles • {profile.skills?.length || 0} Skills
+              </span>
             </div>
             <div className="flex justify-between text-neutral-400">
-              <span>Recruiter AI:</span>
-              <span className="text-indigo-400 font-semibold">Grounded in DB records</span>
+              <span>Target Headline:</span>
+              <span className="text-indigo-400 font-medium truncate max-w-[180px]">
+                {profile.headline || 'Software Specialist'}
+              </span>
             </div>
           </div>
           <div className="flex gap-2">

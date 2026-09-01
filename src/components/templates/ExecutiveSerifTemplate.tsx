@@ -10,6 +10,8 @@ import {
   ExternalLink,
   Github,
   Linkedin,
+  Sparkles,
+  BookOpen,
 } from 'lucide-react';
 import type { FullProfileData, CVVersion } from '../../types/index.ts';
 
@@ -24,21 +26,24 @@ export const ExecutiveSerifTemplate: React.FC<TemplateProps> = ({
   data,
   activeVersion,
   onProjectClick,
+  onSkillClick,
 }) => {
   const { profile } = data;
   const headline = activeVersion?.customHeadline || profile.headline;
   const summary = activeVersion?.customSummary || profile.summary;
 
-  let experiences = data.experiences;
-  let projects = data.projects;
-  let skills = data.skills;
+  let experiences = data.experiences || [];
+  let projects = data.projects || [];
+  let skills = data.skills || [];
 
-  if (activeVersion) {
+  if (activeVersion && activeVersion.slug !== 'general' && !activeVersion.isDefault) {
     if (activeVersion.selectedExperienceIds?.length) {
-      experiences = data.experiences.filter(e => activeVersion.selectedExperienceIds.includes(e.id));
+      const filtered = data.experiences.filter(e => activeVersion.selectedExperienceIds.includes(e.id));
+      if (filtered.length > 0) experiences = filtered;
     }
     if (activeVersion.selectedProjectIds?.length) {
-      projects = data.projects.filter(p => activeVersion.selectedProjectIds.includes(p.id));
+      const filtered = data.projects.filter(p => activeVersion.selectedProjectIds.includes(p.id));
+      if (filtered.length > 0) projects = filtered;
     }
   }
 
@@ -66,6 +71,17 @@ export const ExecutiveSerifTemplate: React.FC<TemplateProps> = ({
               {profile.email}
             </span>
           )}
+          {data.socialLinks.map((s, idx) => (
+            <a
+              key={idx}
+              href={s.url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-amber-400/80 hover:text-amber-300 underline"
+            >
+              {s.label || s.platform}
+            </a>
+          ))}
         </div>
 
         {summary && (
@@ -92,7 +108,7 @@ export const ExecutiveSerifTemplate: React.FC<TemplateProps> = ({
                     {exp.startDate} – {exp.isCurrent ? 'Present' : exp.endDate}
                   </span>
                 </div>
-                <p className="text-sm text-stone-300 font-serif leading-relaxed">
+                <p className="text-sm text-stone-300 font-serif leading-relaxed whitespace-pre-line">
                   {exp.description}
                 </p>
                 {exp.highlights && exp.highlights.length > 0 && (
@@ -101,6 +117,15 @@ export const ExecutiveSerifTemplate: React.FC<TemplateProps> = ({
                       <li key={i}>{h}</li>
                     ))}
                   </ul>
+                )}
+                {exp.technologies && exp.technologies.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {exp.technologies.map((t, i) => (
+                      <span key={i} className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-950 text-stone-400 border border-stone-800">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}
@@ -112,7 +137,7 @@ export const ExecutiveSerifTemplate: React.FC<TemplateProps> = ({
       {projects.length > 0 && (
         <section className="space-y-6">
           <h2 className="text-xs font-serif uppercase tracking-widest text-amber-400 font-bold border-b border-stone-800 pb-2">
-            Selected Works & Architecture
+            Selected Works & Systems
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {projects.map(proj => (
@@ -142,13 +167,58 @@ export const ExecutiveSerifTemplate: React.FC<TemplateProps> = ({
       {skills.length > 0 && (
         <section className="space-y-4">
           <h2 className="text-xs font-serif uppercase tracking-widest text-amber-400 font-bold border-b border-stone-800 pb-2">
-            Core Competencies
+            Core Competencies & Stack
           </h2>
           <div className="flex flex-wrap gap-2">
             {skills.map(s => (
-              <span key={s.id} className="px-3 py-1 rounded bg-stone-900 border border-stone-800 text-xs font-serif text-stone-300">
+              <span
+                key={s.id}
+                onClick={() => onSkillClick?.(s.name)}
+                className="px-3 py-1 rounded bg-stone-900 border border-stone-800 text-xs font-serif text-stone-300 cursor-pointer hover:border-amber-500/50"
+              >
                 {s.name}
               </span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Education */}
+      {data.education && data.education.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="text-xs font-serif uppercase tracking-widest text-amber-400 font-bold border-b border-stone-800 pb-2">
+            Academic Background
+          </h2>
+          <div className="space-y-4">
+            {data.education.map(edu => (
+              <div key={edu.id} className="space-y-1">
+                <div className="flex justify-between items-baseline">
+                  <h3 className="text-base font-serif font-bold text-stone-100">{edu.degree} {edu.fieldOfStudy && `in ${edu.fieldOfStudy}`}</h3>
+                  <span className="text-xs font-mono text-stone-400">{edu.startDate} – {edu.endDate}</span>
+                </div>
+                <p className="text-sm font-serif text-amber-200/90">{edu.institution} {edu.gpa && `• GPA: ${edu.gpa}`}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Certifications & Achievements */}
+      {((data.certifications && data.certifications.length > 0) || (data.achievements && data.achievements.length > 0)) && (
+        <section className="space-y-4">
+          <h2 className="text-xs font-serif uppercase tracking-widest text-amber-400 font-bold border-b border-stone-800 pb-2">
+            Honors & Certifications
+          </h2>
+          <div className="space-y-3 font-serif text-sm text-stone-300">
+            {data.certifications?.map(c => (
+              <div key={c.id}>
+                <span className="font-bold text-stone-100">{c.name}</span> — {c.issuer} ({c.issueDate})
+              </div>
+            ))}
+            {data.achievements?.map(a => (
+              <div key={a.id}>
+                <span className="font-bold text-stone-100">{a.title}</span>: {a.description}
+              </div>
             ))}
           </div>
         </section>

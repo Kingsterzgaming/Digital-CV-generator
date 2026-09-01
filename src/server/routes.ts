@@ -155,8 +155,8 @@ router.post('/cv/upload', upload.single('file'), async (req: Request, res: Respo
       rawText,
     });
 
-    // Run AI structured extraction
-    const extractedData = await extractStructuredCV(rawText);
+    // Run AI structured extraction with multimodal document buffer
+    const extractedData = await extractStructuredCV(rawText, file.buffer, file.mimetype, file.originalname);
 
     res.json({
       success: true,
@@ -171,7 +171,7 @@ router.post('/cv/upload', upload.single('file'), async (req: Request, res: Respo
   }
 });
 
-// Stage 2: User Confirms Reviewed & Edited Data -> Commits to PostgreSQL Database as Source of Truth
+// Stage 2: User Confirms Reviewed & Edited Data -> Commits to Profile
 router.post('/cv/commit', (req: Request, res: Response) => {
   try {
     const userId = getAuthUserId(req);
@@ -201,7 +201,7 @@ router.post('/cv/commit', (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      message: 'CV data successfully confirmed and committed to database source of truth.',
+      message: 'CV data successfully confirmed and saved.',
       fullProfile,
     });
   } catch (err: any) {
@@ -229,7 +229,7 @@ router.post('/cv/reimport-diff', upload.single('file'), async (req: Request, res
 
     const file = req.file;
     const rawText = await parseDocumentBuffer(file.buffer, file.mimetype, file.originalname);
-    const newExtracted = await extractStructuredCV(rawText);
+    const newExtracted = await extractStructuredCV(rawText, file.buffer, file.mimetype, file.originalname);
 
     // Compute granular diffs
     const additions: any[] = [];

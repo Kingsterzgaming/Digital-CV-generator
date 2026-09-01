@@ -408,15 +408,15 @@ class Database {
     this.data.publications.push(...createdPublications);
 
     // Social Links
-    this.data.socialLinks = this.data.socialLinks.filter(s => !(s as any).profileId || (s as any).profileId !== profileId);
-    const createdSocialLinks: SocialLink[] = data.socialLinks.map(s => ({
+    this.data.socialLinks = this.data.socialLinks.filter(s => (s as any).profileId !== profileId);
+    const createdSocialLinks: SocialLink[] = (data.socialLinks || []).map(s => ({
       ...s,
       id: `soc_${crypto.randomUUID().slice(0, 8)}`,
       profileId,
     } as any));
     this.data.socialLinks.push(...createdSocialLinks);
 
-    // Default CV version if none exists
+    // Sync or create default CV version with 100% of newly extracted entities
     const existingVersions = this.data.versions.filter(v => v.profileId === profileId);
     if (existingVersions.length === 0) {
       const defaultVersion: CVVersion = {
@@ -428,12 +428,22 @@ class Database {
         customHeadline: profile.headline,
         customSummary: profile.summary,
         selectedProjectIds: createdProjects.map(p => p.id),
-        highlightedSkillIds: createdSkills.slice(0, 8).map(s => s.id),
+        highlightedSkillIds: createdSkills.map(s => s.id),
         selectedExperienceIds: createdExperiences.map(e => e.id),
         isDefault: true,
         createdAt: new Date().toISOString(),
       };
       this.data.versions.push(defaultVersion);
+    } else {
+      existingVersions.forEach(v => {
+        if (v.isDefault || v.slug === 'general') {
+          v.selectedProjectIds = createdProjects.map(p => p.id);
+          v.selectedExperienceIds = createdExperiences.map(e => e.id);
+          v.highlightedSkillIds = createdSkills.map(s => s.id);
+          v.customHeadline = profile.headline;
+          v.customSummary = profile.summary;
+        }
+      });
     }
 
     this.save();

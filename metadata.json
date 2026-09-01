@@ -2,5 +2,7 @@
   "name": "DigitalCV",
   "description": "Convert CVs and resumes into interactive, customizable digital portfolios with AI recruiter assistance, multi-versioning, and analytics.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

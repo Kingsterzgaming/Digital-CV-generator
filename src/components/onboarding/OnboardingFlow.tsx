@@ -786,7 +786,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) =>
             <div className="flex items-center justify-between pt-6 border-t border-neutral-800">
               <div className="text-xs text-neutral-400 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Extracted data will become your PostgreSQL database source of truth.</span>
+                <span>Review and verify all extracted details before generating your profile.</span>
               </div>
               <button
                 onClick={handleConfirmAndSave}
@@ -799,13 +799,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) =>
           </div>
         )}
 
-        {/* STEP 4: SAVING TO DATABASE */}
+        {/* STEP 4: SAVING PROFILE */}
         {step === 'saving' && (
           <div className="py-20 text-center space-y-4">
             <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mx-auto" />
-            <h3 className="text-xl font-bold text-white">Saving Profile to Database</h3>
+            <h3 className="text-xl font-bold text-white">Generating Digital CV Profile</h3>
             <p className="text-sm text-neutral-400 max-w-sm mx-auto">
-              Creating normalized records for work experiences, skills matrix, projects, and digital CV versions...
+              Setting up your interactive profile, work experiences, skills matrix, and shareable link...
             </p>
           </div>
         )}

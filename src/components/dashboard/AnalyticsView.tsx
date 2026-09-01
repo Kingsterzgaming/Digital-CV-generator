@@ -4,7 +4,7 @@ import {
   Eye,
   FileDown,
   MousePointerClick,
-  Bot,
+  Share2,
   TrendingUp,
   Globe,
   Calendar,
@@ -39,12 +39,12 @@ export const AnalyticsView: React.FC = () => {
   if (loading) {
     return (
       <div className="py-20 text-center text-xs text-neutral-400">
-        Loading visitor metrics and recruiter activity...
+        Loading visitor metrics and engagement activity...
       </div>
     );
   }
 
-  const counts = stats?.counts || { page_view: 0, resume_download: 0, project_click: 0, recruiter_chat: 0 };
+  const counts = stats?.counts || { page_view: 0, resume_download: 0, project_click: 0, share_click: 0 };
   const recentEvents: any[] = stats?.recentEvents || [];
 
   return (
@@ -53,7 +53,7 @@ export const AnalyticsView: React.FC = () => {
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-indigo-400" />
-            <span>Visitor & Recruiter Activity Tracker</span>
+            <span>Visitor & Engagement Activity Tracker</span>
           </h2>
           <p className="text-xs text-neutral-400 mt-1">
             Real-time engagement telemetry from your live public Digital CV profile.
@@ -75,7 +75,7 @@ export const AnalyticsView: React.FC = () => {
           { label: 'Total Profile Views', count: counts.page_view || 0, icon: Eye, color: 'text-indigo-400', bg: 'bg-indigo-950/20 border-indigo-500/20' },
           { label: 'CV Downloads (PDF)', count: counts.resume_download || 0, icon: FileDown, color: 'text-emerald-400', bg: 'bg-emerald-950/20 border-emerald-500/20' },
           { label: 'Project Clicks', count: counts.project_click || 0, icon: MousePointerClick, color: 'text-sky-400', bg: 'bg-sky-950/20 border-sky-500/20' },
-          { label: 'Recruiter AI Inquiries', count: counts.recruiter_chat || 0, icon: Bot, color: 'text-amber-400', bg: 'bg-amber-950/20 border-amber-500/20' },
+          { label: 'Portfolio Link Shares', count: counts.share_click || counts.recruiter_chat || 0, icon: Share2, color: 'text-amber-400', bg: 'bg-amber-950/20 border-amber-500/20' },
         ].map((m, idx) => {
           const Icon = m.icon;
           return (
