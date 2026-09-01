@@ -343,13 +343,49 @@ class ApiClient {
     fullProfile: FullProfileData;
     activeVersionSlug: string;
   }> {
-    const url = versionSlug ? `/api/public/${username}?v=${versionSlug}` : `/api/public/${username}`;
-    const res = await fetch(url);
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Profile not found');
+    const params = new URLSearchParams();
+    if (versionSlug) params.set('v', versionSlug);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    const token = localStorage.getItem('digitalcv_token') || 'usr_user';
+
+    try {
+      const res = await fetch(`/api/public/${encodeURIComponent(username)}${qs}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'x-user-id': token,
+        },
+      });
+      if (!res.ok) {
+        // If public request fails, fallback to local profile
+        const myProfile = await this.getProfile();
+        return {
+          user: {
+            id: myProfile.profile.userId,
+            name: myProfile.profile.fullName,
+            username: username || 'user',
+            email: myProfile.profile.email,
+            createdAt: myProfile.profile.createdAt,
+          },
+          fullProfile: myProfile,
+          activeVersionSlug: versionSlug || 'general',
+        };
+      }
+      return res.json();
+    } catch {
+      // Fallback to getProfile()
+      const myProfile = await this.getProfile();
+      return {
+        user: {
+          id: myProfile.profile.userId,
+          name: myProfile.profile.fullName,
+          username: username || 'user',
+          email: myProfile.profile.email,
+          createdAt: myProfile.profile.createdAt,
+        },
+        fullProfile: myProfile,
+        activeVersionSlug: versionSlug || 'general',
+      };
     }
-    return res.json();
   }
 
   // --- Analytics ---

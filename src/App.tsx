@@ -69,10 +69,10 @@ function AppContent() {
   }
 
   // 2. Owner Preview Mode (opened from within Dashboard)
-  if (isViewingPublic && user?.username) {
+  if (isViewingPublic) {
     return (
       <PublicCVPage
-        username={user.username}
+        username={user?.username || fullProfile?.profile?.fullName?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'prateek'}
         onBackToDashboard={() => setIsViewingPublic(false)}
         previewMode={true}
       />

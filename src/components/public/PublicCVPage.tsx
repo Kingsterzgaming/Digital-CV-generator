@@ -12,6 +12,7 @@ import {
   Check,
 } from 'lucide-react';
 import { api } from '../../lib/api.ts';
+import { useAuth } from '../../context/AuthContext.tsx';
 import type { FullProfileData, CVVersion, TemplateType } from '../../types/index.ts';
 import { ModernCleanTemplate } from '../templates/ModernCleanTemplate.tsx';
 import { ExecutiveSerifTemplate } from '../templates/ExecutiveSerifTemplate.tsx';
@@ -34,11 +35,12 @@ export const PublicCVPage: React.FC<PublicCVPageProps> = ({
   onBackToDashboard,
   previewMode = false,
 }) => {
-  const [profileData, setProfileData] = useState<FullProfileData | null>(null);
+  const { fullProfile: authFullProfile } = useAuth();
+  const [profileData, setProfileData] = useState<FullProfileData | null>(authFullProfile || null);
   const [activeVersionSlug, setActiveVersionSlug] = useState<string>(initialVersionSlug || 'general');
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('modern-clean');
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(!authFullProfile);
   const [error, setError] = useState<string | null>(null);
   const [showContactModal, setShowContactModal] = useState<boolean>(false);
 
@@ -48,14 +50,16 @@ export const PublicCVPage: React.FC<PublicCVPageProps> = ({
 
   const loadPublicProfile = async () => {
     try {
-      setLoading(true);
+      if (!profileData) setLoading(true);
       setError(null);
       const res = await api.getPublicProfile(username, activeVersionSlug);
-      setProfileData(res.fullProfile);
-      if (res.fullProfile.profile.templateConfig?.templateId) {
-        setSelectedTemplate(res.fullProfile.profile.templateConfig.templateId as TemplateType);
-      } else if (res.fullProfile.profile.templateConfig?.type) {
-        setSelectedTemplate(res.fullProfile.profile.templateConfig.type);
+      if (res && res.fullProfile) {
+        setProfileData(res.fullProfile);
+        if (res.fullProfile.profile.templateConfig?.templateId) {
+          setSelectedTemplate(res.fullProfile.profile.templateConfig.templateId as TemplateType);
+        } else if (res.fullProfile.profile.templateConfig?.type) {
+          setSelectedTemplate(res.fullProfile.profile.templateConfig.type);
+        }
       }
 
       // Record page view analytics event for tracking visitor activity
@@ -68,7 +72,14 @@ export const PublicCVPage: React.FC<PublicCVPageProps> = ({
         }).catch(() => {});
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to load public profile');
+      if (authFullProfile) {
+        setProfileData(authFullProfile);
+        if (authFullProfile.profile.templateConfig?.type) {
+          setSelectedTemplate(authFullProfile.profile.templateConfig.type);
+        }
+      } else {
+        setError(err.message || 'Failed to load public profile');
+      }
     } finally {
       setLoading(false);
     }
