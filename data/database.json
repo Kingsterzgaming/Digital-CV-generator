@@ -1,0 +1,244 @@
+{
+  "version": 1,
+  "users": [
+    {
+      "id": "usr_user",
+      "email": "prateekchauhan948@gmail.com",
+      "name": "Prateek Chauhan",
+      "username": "prateek",
+      "avatarUrl": "",
+      "createdAt": "2026-09-01T13:40:00.000Z",
+      "passwordHash": "user123"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "prf_user",
+      "userId": "usr_user",
+      "fullName": "Prateek Chauhan",
+      "headline": "",
+      "summary": "",
+      "email": "prateekchauhan948@gmail.com",
+      "phone": "",
+      "location": "",
+      "avatarUrl": "",
+      "templateConfig": {
+        "templateId": "modern-clean",
+        "colorScheme": "indigo",
+        "fontFamily": "plus-jakarta",
+        "themeMode": "dark",
+        "sectionOrder": [
+          "hero",
+          "about",
+          "skills",
+          "experience",
+          "internships",
+          "projects",
+          "education",
+          "certifications",
+          "achievements",
+          "publications",
+          "contact",
+          "social"
+        ],
+        "visibleSections": {
+          "hero": true,
+          "about": true,
+          "skills": true,
+          "experience": true,
+          "internships": true,
+          "projects": true,
+          "education": true,
+          "certifications": true,
+          "achievements": true,
+          "publications": true,
+          "contact": true,
+          "social": true
+        },
+        "layoutStyle": "spacious"
+      },
+      "isPublic": true,
+      "createdAt": "2026-09-01T13:40:00.000Z",
+      "updatedAt": "2026-09-01T13:40:00.000Z"
+    }
+  ],
+  "experiences": [
+    {
+      "company": "Experience extracted from CV",
+      "role": "Role Title",
+      "location": "",
+      "startDate": "2022",
+      "endDate": "Present",
+      "isCurrent": true,
+      "description": "kingsterzgaming.github.io/\n(Portfolio)\nTop Skills\nTypeScript\nReact.js\nMERN Stack\nCertifications",
+      "highlights": [],
+      "technologies": [
+        "TypeScript",
+        "React",
+        "Python"
+      ],
+      "profileId": "prf_user",
+      "id": "exp_6634c8f8"
+    }
+  ],
+  "education": [],
+  "skills": [
+    {
+      "name": "TypeScript",
+      "category": "technical",
+      "proficiency": "advanced",
+      "profileId": "prf_user",
+      "id": "skl_4d7533ec"
+    },
+    {
+      "name": "React",
+      "category": "technical",
+      "proficiency": "advanced",
+      "profileId": "prf_user",
+      "id": "skl_c8c96007"
+    },
+    {
+      "name": "Python",
+      "category": "technical",
+      "proficiency": "advanced",
+      "profileId": "prf_user",
+      "id": "skl_b25311ba"
+    }
+  ],
+  "projects": [],
+  "certifications": [],
+  "achievements": [],
+  "publications": [],
+  "socialLinks": [],
+  "versions": [],
+  "analyticsEvents": [
+    {
+      "profileId": "prf_user",
+      "eventType": "page_view",
+      "referrer": "https://ais-dev-zxsog6xozl6z2ymger3g7f-360254834917.us-east5.run.app/",
+      "metadata": {
+        "versionSlug": "general"
+      },
+      "id": "evt_fd8643f7",
+      "timestamp": "2026-09-01T13:43:14.903Z"
+    },
+    {
+      "profileId": "prf_user",
+      "eventType": "page_view",
+      "referrer": "https://ais-dev-zxsog6xozl6z2ymger3g7f-360254834917.us-east5.run.app/",
+      "metadata": {
+        "versionSlug": "general"
+      },
+      "id": "evt_1f473199",
+      "timestamp": "2026-09-01T13:43:15.236Z"
+    },
+    {
+      "profileId": "prf_user",
+      "eventType": "page_view",
+      "referrer": "https://ais-dev-zxsog6xozl6z2ymger3g7f-360254834917.us-east5.run.app/",
+      "metadata": {
+        "versionSlug": "general"
+      },
+      "id": "evt_88e2b7e9",
+      "timestamp": "2026-09-01T13:57:07.068Z"
+    },
+    {
+      "profileId": "prf_user",
+      "eventType": "page_view",
+      "referrer": "https://ais-dev-zxsog6xozl6z2ymger3g7f-360254834917.us-east5.run.app/",
+      "metadata": {
+        "versionSlug": "general"
+      },
+      "id": "evt_30feab7d",
+      "timestamp": "2026-09-01T13:57:07.401Z"
+    },
+    {
+      "profileId": "prf_user",
+      "eventType": "page_view",
+      "referrer": "https://ais-dev-zxsog6xozl6z2ymger3g7f-360254834917.us-east5.run.app/",
+      "metadata": {
+        "versionSlug": "general"
+      },
+      "id": "evt_1692d27a",
+      "timestamp": "2026-09-01T13:57:50.789Z"
+    },
+    {
+      "profileId": "prf_user",
+      "eventType": "page_view",
+      "referrer": "https://ais-dev-zxsog6xozl6z2ymger3g7f-360254834917.us-east5.run.app/",
+      "metadata": {
+        "versionSlug": "general"
+      },
+      "id": "evt_68eef038",
+      "timestamp": "2026-09-01T13:57:51.120Z"
+    },
+    {
+      "profileId": "prf_user",
+      "eventType": "resume_download",
+      "metadata": {
+        "versionSlug": "general"
+      },
+      "referrer": "https://ais-dev-zxsog6xozl6z2ymger3g7f-360254834917.us-east5.run.app/",
+      "id": "evt_2d0a2dd3",
+      "timestamp": "2026-09-01T13:58:02.820Z"
+    }
+  ],
+  "cvFiles": [
+    {
+      "id": "cv_5bfa70e9",
+      "userId": "usr_user",
+      "fileName": "sample_cv.txt",
+      "fileUrl": "/api/files/1788270606975_sample_cv.txt",
+      "rawText": "Prateek Chauhan\nSenior Software Engineer\nprateekchauhan948@gmail.com | +1 555-0199 | San Francisco, CA\n\nEXPERIENCE\nAcme Corp — Staff Engineer\n2022 - Present\n- Built distributed realtime telemetry system handling 50k events/sec with React, Node.js, and TypeScript.\n- Architected digital portfolio platform with AI parser.\n\nSKILLS\nTypeScript, React, Node.js, PostgreSQL, Docker, Kubernetes, TailwindCSS, Next.js\n\nEDUCATION\nUniversity of California, Berkeley — B.S. Computer Science\n2018 - 2022",
+      "uploadedAt": "2026-09-01T13:50:06.976Z"
+    },
+    {
+      "id": "cv_9bc2bdd4",
+      "userId": "usr_user",
+      "fileName": "sample_cv.txt",
+      "fileUrl": "/api/files/1788270615246_sample_cv.txt",
+      "rawText": "Prateek Chauhan\nSenior Software Engineer\nprateekchauhan948@gmail.com | +1 555-0199 | San Francisco, CA\n\nEXPERIENCE\nAcme Corp — Staff Engineer\n2022 - Present\n- Built distributed realtime telemetry system handling 50k events/sec with React, Node.js, and TypeScript.\n- Architected digital portfolio platform with AI parser.\n\nSKILLS\nTypeScript, React, Node.js, PostgreSQL, Docker, Kubernetes, TailwindCSS, Next.js\n\nEDUCATION\nUniversity of California, Berkeley — B.S. Computer Science\n2018 - 2022",
+      "uploadedAt": "2026-09-01T13:50:15.246Z"
+    },
+    {
+      "id": "cv_7f502df6",
+      "userId": "usr_user",
+      "fileName": "sample_cv.txt",
+      "fileUrl": "/api/files/1788270620855_sample_cv.txt",
+      "rawText": "Prateek Chauhan\nSenior Software Engineer\nprateekchauhan948@gmail.com | +1 555-0199 | San Francisco, CA\n\nEXPERIENCE\nAcme Corp — Staff Engineer\n2022 - Present\n- Built distributed realtime telemetry system handling 50k events/sec with React, Node.js, and TypeScript.\n- Architected digital portfolio platform with AI parser.\n\nSKILLS\nTypeScript, React, Node.js, PostgreSQL, Docker, Kubernetes, TailwindCSS, Next.js\n\nEDUCATION\nUniversity of California, Berkeley — B.S. Computer Science\n2018 - 2022",
+      "uploadedAt": "2026-09-01T13:50:20.856Z"
+    },
+    {
+      "id": "cv_3abd2752",
+      "userId": "usr_user",
+      "fileName": "Profile.pdf",
+      "fileUrl": "/api/files/1788271008532_Profile.pdf",
+      "rawText": "Contact\n9690912846 (Work)\nprateekchauhan948@gmail.com\nwww.linkedin.com/in/\nprateekchauhan-pcss (LinkedIn)\nkingsterzgaming.github.io/\n(Portfolio)\nTop Skills\nTypeScript\nReact.js\nMERN Stack\nCertifications\nAI Tools Workshop\nPrateek Chauhan\nAI Developer | Full-Stack & Automation Engineer | Python • Unity •\nBackend | Open to Work\nHaridwar, Uttarakhand, India\nSummary\nAI-powered Full-Stack Developer focused on building scalable\napplications, intelligent automation systems, and practical software\nsolutions. I combine modern AI tools with strong system design,\nbackend architecture, and API development.Over the past year, I\nindependently designed and developed multiple AI-driven projects in\nlocal environments. These include multimodal systems, automation\npipelines, OCR/NLP workflows, and intelligent routing prototypes\nusing Python and Gemini API.Previously worked as a QA Engineer\n&amp; Community Manager (scaled a community from 2K to 31K\n+) and as a Unity Developer Intern.Core strengths:• AI &amp;\nAutomation (Prompt Engineering, Multimodal AI, OCR, NLP)•\nBackend &amp; API Development• Unity (C#) &amp; Game\nSystems• System Design &amp; Clean ArchitectureCurrently\nopen to full-time roles in AI Development, Automation,\nBackend, or Full-Stack. Open to remote opportunities.Portfolio:\nhttps://kingsterzgaming.github.ioGitHub: https://github.com/\nKingsterzgaming\nExperience\nSelf Employed\nIndependent AI & Automation Projects\nAugust 2025 - Present (1 year 2 months)\nDesigned and developed multiple AI prototypes in local environments focused\non multimodal understanding, automation workflows, and intelligent systems.\nBuilt end-to-end pipelines using Python, Gemini API, computer vision, OCR,\nand NLP for use cases such as notification routing, document analysis, and\ncontent intelligence. Strengthened skills in prompt engineering, system design,\nand practical AI application development.\nPCSS Softech private limited\nFounder & Lead CTO\nJuly 2023 - August 2025 (2 years 2 months)\nPage 1 of 2\n\n-- 1 of 2 --\n\nFounded a technology company with the intention of building software and\ndigital solutions. Handled technical planning, system architecture exploration,\nand overall technology direction during the early stage of the company.\nHeyo Entertainment Pvt Ltd\nGame Developer\nJanuary 2025 - July 2025 (7 months)\nDeveloped gameplay systems using Unity and C#. Optimized assets and\nreduced build size by approximately 100 MB. Automated art workflows\nGlip.gg\nCommunity Manager\nDecember 2022 - July 2025 (2 years 8 months)\nBengaluru\nScaled Discord community from 2,000 to 31,000+ members through\nengagement strategies and process improvements. Increased Daily Active\nUsers by 200–300%. Performed functional, regression, and UAT testing;\nreduced critical post-release bugs by 40%.\nEducation\nUttrakhand Technical University, Dehradun\nBachelor of Technology - BTech, Computer Science and\nEngineering · (September 2018 - July 2022)\nPage 2 of 2\n\n-- 2 of 2 --",
+      "uploadedAt": "2026-09-01T13:56:48.533Z"
+    },
+    {
+      "id": "cv_711ffe93",
+      "userId": "usr_user",
+      "fileName": "Profile.pdf",
+      "fileUrl": "/api/files/1788271053847_Profile.pdf",
+      "rawText": "Contact\n9690912846 (Work)\nprateekchauhan948@gmail.com\nwww.linkedin.com/in/\nprateekchauhan-pcss (LinkedIn)\nkingsterzgaming.github.io/\n(Portfolio)\nTop Skills\nTypeScript\nReact.js\nMERN Stack\nCertifications\nAI Tools Workshop\nPrateek Chauhan\nAI Developer | Full-Stack & Automation Engineer | Python • Unity •\nBackend | Open to Work\nHaridwar, Uttarakhand, India\nSummary\nAI-powered Full-Stack Developer focused on building scalable\napplications, intelligent automation systems, and practical software\nsolutions. I combine modern AI tools with strong system design,\nbackend architecture, and API development.Over the past year, I\nindependently designed and developed multiple AI-driven projects in\nlocal environments. These include multimodal systems, automation\npipelines, OCR/NLP workflows, and intelligent routing prototypes\nusing Python and Gemini API.Previously worked as a QA Engineer\n&amp; Community Manager (scaled a community from 2K to 31K\n+) and as a Unity Developer Intern.Core strengths:• AI &amp;\nAutomation (Prompt Engineering, Multimodal AI, OCR, NLP)•\nBackend &amp; API Development• Unity (C#) &amp; Game\nSystems• System Design &amp; Clean ArchitectureCurrently\nopen to full-time roles in AI Development, Automation,\nBackend, or Full-Stack. Open to remote opportunities.Portfolio:\nhttps://kingsterzgaming.github.ioGitHub: https://github.com/\nKingsterzgaming\nExperience\nSelf Employed\nIndependent AI & Automation Projects\nAugust 2025 - Present (1 year 2 months)\nDesigned and developed multiple AI prototypes in local environments focused\non multimodal understanding, automation workflows, and intelligent systems.\nBuilt end-to-end pipelines using Python, Gemini API, computer vision, OCR,\nand NLP for use cases such as notification routing, document analysis, and\ncontent intelligence. Strengthened skills in prompt engineering, system design,\nand practical AI application development.\nPCSS Softech private limited\nFounder & Lead CTO\nJuly 2023 - August 2025 (2 years 2 months)\nPage 1 of 2\n\n-- 1 of 2 --\n\nFounded a technology company with the intention of building software and\ndigital solutions. Handled technical planning, system architecture exploration,\nand overall technology direction during the early stage of the company.\nHeyo Entertainment Pvt Ltd\nGame Developer\nJanuary 2025 - July 2025 (7 months)\nDeveloped gameplay systems using Unity and C#. Optimized assets and\nreduced build size by approximately 100 MB. Automated art workflows\nGlip.gg\nCommunity Manager\nDecember 2022 - July 2025 (2 years 8 months)\nBengaluru\nScaled Discord community from 2,000 to 31,000+ members through\nengagement strategies and process improvements. Increased Daily Active\nUsers by 200–300%. Performed functional, regression, and UAT testing;\nreduced critical post-release bugs by 40%.\nEducation\nUttrakhand Technical University, Dehradun\nBachelor of Technology - BTech, Computer Science and\nEngineering · (September 2018 - July 2022)\nPage 2 of 2\n\n-- 2 of 2 --",
+      "uploadedAt": "2026-09-01T13:57:33.848Z"
+    },
+    {
+      "id": "cv_b02c2781",
+      "userId": "usr_user",
+      "fileName": "sample_cv2.txt",
+      "fileUrl": "/api/files/1788271313346_sample_cv2.txt",
+      "rawText": "Prateek Chauhan\nSenior Full-Stack Engineer & Distributed Systems Specialist\nprateekchauhan948@gmail.com | +1 (555) 234-5678 | San Francisco, CA | github.com/prateek | linkedin.com/in/prateek\n\nSUMMARY\nResults-oriented Senior Software Engineer with 6+ years of experience designing high-throughput distributed systems, modern React frontends, and cloud microservices.\n\nWORK EXPERIENCE\nApex Distributed Labs — Senior Staff Engineer\n2022 - Present\n- Architected enterprise cloud event stream platform processing 100M+ messages daily.\n- Built interactive digital dashboard in TypeScript and TailwindCSS.\n- Mentored a team of 8 junior and mid-level engineers.\n\nCloudScale Technologies — Software Engineer\n2019 - 2022\n- Led backend API development with Node.js, Go, and PostgreSQL.\n- Reduced API p99 latency by 45% using Redis caching and connection pooling.\n\nEDUCATION\nUniversity of California, Berkeley\nB.S. in Computer Science, Magna Cum Laude\n2015 - 2019\nGPA: 3.85\n\nSKILLS\nTypeScript, React, Next.js, Node.js, Python, Go, PostgreSQL, Redis, Docker, Kubernetes, AWS, GraphQL, TailwindCSS\n\nPROJECTS\nHyperStream Engine: High-performance WebSocket streaming gateway built in Go and TypeScript with over 2.5k GitHub stars.\nAI Resume Synthesizer: Intelligent ATS CV parser with real-time analytics.",
+      "uploadedAt": "2026-09-01T14:01:53.346Z"
+    },
+    {
+      "id": "cv_f867e7bb",
+      "userId": "usr_user",
+      "fileName": "sample_cv3.txt",
+      "fileUrl": "/api/files/1788271331381_sample_cv3.txt",
+      "rawText": "Prateek Chauhan\nSenior Full-Stack Engineer & Distributed Systems Specialist\nprateekchauhan948@gmail.com | +1 (555) 234-5678 | San Francisco, CA | github.com/prateek | linkedin.com/in/prateek\n\nSUMMARY\nResults-oriented Senior Software Engineer with 6+ years of experience designing high-throughput distributed systems.\n\nWORK EXPERIENCE\nApex Distributed Labs — Senior Staff Engineer\n2022 - Present\n- Architected enterprise cloud event stream platform processing 100M+ messages daily.\n- Built interactive digital dashboard in TypeScript and TailwindCSS.\n- Mentored a team of 8 junior and mid-level engineers.\n\nCloudScale Technologies — Software Engineer\n2019 - 2022\n- Led backend API development with Node.js, Go, and PostgreSQL.\n- Reduced API p99 latency by 45% using Redis caching and connection pooling.\n\nEDUCATION\nUniversity of California, Berkeley — B.S. in Computer Science\n2015 - 2019\n\nSKILLS\nTypeScript, React, Next.js, Node.js, Python, Go, PostgreSQL, Redis, Docker, Kubernetes, AWS, GraphQL, TailwindCSS",
+      "uploadedAt": "2026-09-01T14:02:11.381Z"
+    }
+  ]
+}

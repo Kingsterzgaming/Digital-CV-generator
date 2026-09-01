@@ -1,0 +1,31 @@
+Prateek Chauhan
+Senior Full-Stack Engineer & Distributed Systems Specialist
+prateekchauhan948@gmail.com | +1 (555) 234-5678 | San Francisco, CA | github.com/prateek | linkedin.com/in/prateek
+
+SUMMARY
+Results-oriented Senior Software Engineer with 6+ years of experience designing high-throughput distributed systems, modern React frontends, and cloud microservices.
+
+WORK EXPERIENCE
+Apex Distributed Labs — Senior Staff Engineer
+2022 - Present
+- Architected enterprise cloud event stream platform processing 100M+ messages daily.
+- Built interactive digital dashboard in TypeScript and TailwindCSS.
+- Mentored a team of 8 junior and mid-level engineers.
+
+CloudScale Technologies — Software Engineer
+2019 - 2022
+- Led backend API development with Node.js, Go, and PostgreSQL.
+- Reduced API p99 latency by 45% using Redis caching and connection pooling.
+
+EDUCATION
+University of California, Berkeley
+B.S. in Computer Science, Magna Cum Laude
+2015 - 2019
+GPA: 3.85
+
+SKILLS
+TypeScript, React, Next.js, Node.js, Python, Go, PostgreSQL, Redis, Docker, Kubernetes, AWS, GraphQL, TailwindCSS
+
+PROJECTS
+HyperStream Engine: High-performance WebSocket streaming gateway built in Go and TypeScript with over 2.5k GitHub stars.
+AI Resume Synthesizer: Intelligent ATS CV parser with real-time analytics.
