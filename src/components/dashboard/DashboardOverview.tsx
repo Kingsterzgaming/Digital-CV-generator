@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Briefcase,
   FolderGit2,
@@ -18,6 +18,10 @@ import {
   TrendingUp,
   FileText,
   RefreshCw,
+  Upload,
+  ExternalLink,
+  Loader2,
+  FileType,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { api } from '../../lib/api.ts';
@@ -40,6 +44,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const { user, fullProfile, setLocalFullProfile } = useAuth();
   const [copied, setCopied] = useState<boolean>(false);
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
+  const [isReplacingPDF, setIsReplacingPDF] = useState<boolean>(false);
+  const [replaceNotice, setReplaceNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isDragActive, setIsDragActive] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!fullProfile) return null;
 
@@ -61,8 +69,162 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     }
   };
 
+  const handleDirectPDFUpload = async (file: File) => {
+    if (!file) return;
+    setIsReplacingPDF(true);
+    setReplaceNotice(null);
+
+    try {
+      const res = await api.replaceWithPDF(file);
+      setLocalFullProfile(res.fullProfile);
+      setReplaceNotice({
+        type: 'success',
+        text: `Stored "${file.name}" as default and replaced profile data (${res.fullProfile.experiences.length} roles, ${res.fullProfile.skills.length} skills, ${res.fullProfile.projects.length} projects).`,
+      });
+    } catch (err: any) {
+      setReplaceNotice({
+        type: 'error',
+        text: err.message || 'Failed to replace PDF. Please check file format.',
+      });
+    } finally {
+      setIsReplacingPDF(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleDirectPDFUpload(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleDirectPDFUpload(file);
+  };
+
   return (
     <div className="space-y-8 max-w-5xl">
+      {/* Hidden File Input for Direct PDF Replacement */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".pdf,.docx,.doc,.txt"
+        className="hidden"
+      />
+
+      {/* Notice Banner */}
+      {replaceNotice && (
+        <div
+          className={`p-4 rounded-2xl flex items-center justify-between gap-3 text-xs font-medium border ${
+            replaceNotice.type === 'success'
+              ? 'bg-emerald-950/60 border-emerald-800 text-emerald-300'
+              : 'bg-rose-950/60 border-rose-800 text-rose-300'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {replaceNotice.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            )}
+            <span>{replaceNotice.text}</span>
+          </div>
+          <button
+            onClick={() => setReplaceNotice(null)}
+            className="text-neutral-400 hover:text-white px-2 py-1 rounded"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Stored Default PDF & Quick Replace Hub */}
+      <div className="p-6 rounded-3xl bg-neutral-900/80 border border-neutral-800 relative overflow-hidden space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-950/80 border border-indigo-800 flex items-center justify-center shrink-0">
+              <FileType className="w-6 h-6 text-indigo-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold text-white">Default CV Document</h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-950 text-indigo-300 border border-indigo-800">
+                  Active Source
+                </span>
+              </div>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                {profile.originalCvFileName ? (
+                  <>
+                    Stored PDF: <strong className="text-neutral-200">{profile.originalCvFileName}</strong>
+                    {profile.originalCvParsedAt && (
+                      <span className="text-neutral-500"> • Synced {new Date(profile.originalCvParsedAt).toLocaleDateString()}</span>
+                    )}
+                  </>
+                ) : (
+                  'No default PDF uploaded yet. Upload a PDF to auto-populate and set default profile data.'
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {profile.originalCvFileUrl && (
+              <a
+                href={profile.originalCvFileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3.5 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              >
+                <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                <span>View Stored PDF</span>
+              </a>
+            )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isReplacingPDF}
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-all hover:scale-105"
+            >
+              {isReplacingPDF ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Replacing & Parsing PDF...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Upload & Replace PDF</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Drag & Drop Quick Area */}
+        <div
+          onDragOver={e => {
+            e.preventDefault();
+            setIsDragActive(true);
+          }}
+          onDragLeave={() => setIsDragActive(false)}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+          className={`p-4 rounded-2xl border-2 border-dashed cursor-pointer transition-all flex items-center justify-center gap-3 text-center ${
+            isDragActive
+              ? 'border-indigo-500 bg-indigo-950/40 text-indigo-300'
+              : 'border-neutral-800 hover:border-indigo-500/50 bg-neutral-950/50 hover:bg-neutral-950 text-neutral-400 hover:text-neutral-300'
+          }`}
+        >
+          <Upload className={`w-4 h-4 ${isDragActive ? 'text-indigo-400' : 'text-neutral-500'}`} />
+          <span className="text-xs">
+            {isReplacingPDF
+              ? 'Extracting sections and replacing data...'
+              : 'Drop a new PDF here to replace existing CV data and update your default profile automatically.'}
+          </span>
+        </div>
+      </div>
       {/* If profile is fresh/empty, show onboarding quickstart */}
       {experiences.length === 0 && skills.length === 0 && projects.length === 0 && (
         <div className="p-6 rounded-2xl bg-indigo-950/30 border border-indigo-500/30 space-y-4">

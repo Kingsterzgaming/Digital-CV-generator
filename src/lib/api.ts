@@ -73,6 +73,33 @@ class ApiClient {
   }
 
   // --- CV Upload & Onboarding ---
+  async replaceWithPDF(file: File): Promise<{
+    success: boolean;
+    message: string;
+    originalFileName: string;
+    originalFileUrl: string;
+    extractedData: any;
+    fullProfile: FullProfileData;
+  }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = localStorage.getItem('digitalcv_token') || 'usr_user';
+    const res = await fetch('/api/cv/replace-pdf', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'x-user-id': token,
+      },
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to replace CV with PDF');
+    }
+    return res.json();
+  }
+
   async uploadCV(file: File): Promise<{
     success: boolean;
     originalFileName: string;

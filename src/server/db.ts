@@ -292,14 +292,14 @@ class Database {
   // --- Bulk Replace / Commit from Extracted CV ---
   commitExtractedCV(userId: string, data: {
     profile: Partial<Profile>;
-    experiences: Omit<Experience, 'id' | 'profileId'>[];
-    education: Omit<Education, 'id' | 'profileId'>[];
-    skills: Omit<Skill, 'id' | 'profileId'>[];
-    projects: Omit<Project, 'id' | 'profileId'>[];
-    certifications: Omit<Certification, 'id' | 'profileId'>[];
-    achievements: Omit<Achievement, 'id' | 'profileId'>[];
-    publications: Omit<Publication, 'id' | 'profileId'>[];
-    socialLinks: Omit<SocialLink, 'id'>[];
+    experiences: Partial<Experience>[];
+    education: Partial<Education>[];
+    skills: Partial<Skill>[];
+    projects: Partial<Project>[];
+    certifications: Partial<Certification>[];
+    achievements: Partial<Achievement>[];
+    publications: Partial<Publication>[];
+    socialLinks: Partial<SocialLink>[];
     rawCvText?: string;
     originalCvFileName?: string;
     originalCvFileUrl?: string;
@@ -356,62 +356,108 @@ class Database {
 
     // Insert new records with IDs
     const createdExperiences: Experience[] = data.experiences.map((item, idx) => ({
-      ...item,
-      id: `exp_${crypto.randomUUID().slice(0, 8)}`,
+      id: item.id || `exp_${crypto.randomUUID().slice(0, 8)}`,
       profileId,
-      order: idx + 1,
+      company: item.company || 'Company',
+      role: item.role || 'Role',
+      location: item.location || '',
+      type: item.type || 'full-time',
+      startDate: item.startDate || '',
+      endDate: item.endDate || '',
+      isCurrent: !!item.isCurrent,
+      description: item.description || '',
+      highlights: item.highlights || [],
+      technologies: item.technologies || [],
+      order: item.order ?? (idx + 1),
     }));
     this.data.experiences.push(...createdExperiences);
 
     const createdEducation: Education[] = data.education.map((item, idx) => ({
-      ...item,
-      id: `edu_${crypto.randomUUID().slice(0, 8)}`,
+      id: item.id || `edu_${crypto.randomUUID().slice(0, 8)}`,
       profileId,
-      order: idx + 1,
+      institution: item.institution || 'Institution',
+      degree: item.degree || 'Degree',
+      fieldOfStudy: item.fieldOfStudy || '',
+      location: item.location || '',
+      startDate: item.startDate || '',
+      endDate: item.endDate || '',
+      isCurrent: !!item.isCurrent,
+      gpa: item.gpa,
+      honors: item.honors,
+      courses: item.courses || [],
+      order: item.order ?? (idx + 1),
     }));
     this.data.education.push(...createdEducation);
 
     const createdSkills: Skill[] = data.skills.map(item => ({
-      ...item,
-      id: `skl_${crypto.randomUUID().slice(0, 8)}`,
+      id: item.id || `skl_${crypto.randomUUID().slice(0, 8)}`,
       profileId,
+      name: item.name || 'Skill',
+      category: item.category || 'technical',
+      proficiency: item.proficiency || 'intermediate',
+      yearsOfExperience: item.yearsOfExperience,
+      highlighted: !!item.highlighted,
     }));
     this.data.skills.push(...createdSkills);
 
     const createdProjects: Project[] = data.projects.map((item, idx) => ({
-      ...item,
-      id: `prj_${crypto.randomUUID().slice(0, 8)}`,
+      id: item.id || `prj_${crypto.randomUUID().slice(0, 8)}`,
       profileId,
-      order: idx + 1,
+      title: item.title || 'Project',
+      tagline: item.tagline || '',
+      description: item.description || '',
+      role: item.role,
+      technologies: item.technologies || [],
+      githubUrl: item.githubUrl,
+      liveUrl: item.liveUrl,
+      screenshots: item.screenshots || [],
+      startDate: item.startDate,
+      endDate: item.endDate,
+      featured: !!item.featured,
+      order: item.order ?? (idx + 1),
     }));
     this.data.projects.push(...createdProjects);
 
     const createdCertifications: Certification[] = data.certifications.map(item => ({
-      ...item,
-      id: `cert_${crypto.randomUUID().slice(0, 8)}`,
+      id: item.id || `cert_${crypto.randomUUID().slice(0, 8)}`,
       profileId,
+      name: item.name || 'Certificate',
+      issuer: item.issuer || '',
+      issueDate: item.issueDate,
+      expiryDate: item.expiryDate,
+      credentialUrl: item.credentialUrl,
+      credentialId: item.credentialId,
     }));
     this.data.certifications.push(...createdCertifications);
 
     const createdAchievements: Achievement[] = data.achievements.map(item => ({
-      ...item,
-      id: `ach_${crypto.randomUUID().slice(0, 8)}`,
+      id: item.id || `ach_${crypto.randomUUID().slice(0, 8)}`,
       profileId,
+      title: item.title || 'Achievement',
+      description: item.description || '',
+      date: item.date,
+      issuer: item.issuer,
     }));
     this.data.achievements.push(...createdAchievements);
 
     const createdPublications: Publication[] = data.publications.map(item => ({
-      ...item,
-      id: `pub_${crypto.randomUUID().slice(0, 8)}`,
+      id: item.id || `pub_${crypto.randomUUID().slice(0, 8)}`,
       profileId,
+      title: item.title || 'Publication',
+      publisher: item.publisher || '',
+      publishedDate: item.publishedDate || (item as any).publishDate,
+      url: item.url,
+      description: item.description,
     }));
     this.data.publications.push(...createdPublications);
 
     // Social Links
     this.data.socialLinks = this.data.socialLinks.filter(s => (s as any).profileId !== profileId);
     const createdSocialLinks: SocialLink[] = (data.socialLinks || []).map(s => ({
-      ...s,
-      id: `soc_${crypto.randomUUID().slice(0, 8)}`,
+      id: s.id || `soc_${crypto.randomUUID().slice(0, 8)}`,
+      platform: s.platform || 'other',
+      label: s.label || s.platform || 'Link',
+      url: s.url || '',
       profileId,
     } as any));
     this.data.socialLinks.push(...createdSocialLinks);

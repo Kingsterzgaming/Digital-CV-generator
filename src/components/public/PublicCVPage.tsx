@@ -213,6 +213,20 @@ export const PublicCVPage: React.FC<PublicCVPageProps> = ({
               <Share2 className="w-4 h-4" />
             </button>
 
+            {/* View Original Stored PDF if exists */}
+            {profileData.profile.originalCvFileUrl && (
+              <a
+                href={profileData.profile.originalCvFileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                title={`View uploaded ${profileData.profile.originalCvFileName || 'document'}`}
+              >
+                <Eye className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="hidden md:inline">Original PDF</span>
+              </a>
+            )}
+
             {/* Download PDF ATS Resume */}
             <button
               onClick={handleDownloadPDF}

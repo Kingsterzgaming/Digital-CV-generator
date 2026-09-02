@@ -118,11 +118,101 @@ router.post('/auth/reset', (req: Request, res: Response) => {
   }
 });
 
+// Helper to clean up previous physical CV files for user to prevent disk bloating
+function cleanupOldUserFiles(userId: string, currentFileUrlToKeep?: string) {
+  try {
+    const profile = db.getProfileByUserId(userId);
+    if (profile && profile.originalCvFileUrl && profile.originalCvFileUrl !== currentFileUrlToKeep) {
+      const oldFilename = path.basename(profile.originalCvFileUrl);
+      const oldPath = path.join(UPLOADS_DIR, oldFilename);
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+        console.log(`Cleaned up previous CV file: ${oldFilename}`);
+      }
+    }
+  } catch (err: any) {
+    console.warn('File cleanup notice:', err.message);
+  }
+}
+
 // ----------------------------------------------------
-// 2. CV UPLOAD & ONBOARDING PIPELINE
+// 2. CV UPLOAD, REPLACEMENT & ONBOARDING PIPELINE
 // ----------------------------------------------------
 
-// Stage 1: Upload and Parse CV -> Returns extracted data for USER REVIEW (does NOT save to DB yet)
+// Direct 1-Step Endpoint: Upload PDF, Store as Default, and Replace All Existing Data
+router.post('/cv/replace-pdf', upload.single('file'), async (req: Request, res: Response) => {
+  try {
+    const userId = getAuthUserId(req) || 'usr_user';
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No PDF or CV document provided' });
+    }
+
+    const file = req.file;
+
+    // Clean up previous uploaded files for this user
+    cleanupOldUserFiles(userId);
+
+    // Save physical file
+    const savedFileName = `${Date.now()}_${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const filePath = path.join(UPLOADS_DIR, savedFileName);
+    fs.writeFileSync(filePath, file.buffer);
+    const fileUrl = `/api/files/${savedFileName}`;
+
+    // Parse document text
+    let rawText = '';
+    try {
+      rawText = await parseDocumentBuffer(file.buffer, file.mimetype, file.originalname);
+    } catch (parseErr: any) {
+      console.warn('Document buffer parsing notice:', parseErr.message);
+      rawText = `Uploaded document: ${file.originalname}`;
+    }
+
+    if (!rawText || rawText.trim().length < 5) {
+      rawText = `Uploaded document: ${file.originalname} (${(file.size / 1024).toFixed(1)} KB).`;
+    }
+
+    db.saveCVFileRecord({
+      userId,
+      fileName: file.originalname,
+      fileUrl,
+      rawText,
+    });
+
+    // Extract structured data from document
+    const extractedData = await extractStructuredCV(rawText, file.buffer, file.mimetype, file.originalname);
+
+    // Immediately commit and replace all profile data as the default
+    const fullProfile = db.commitExtractedCV(userId, {
+      profile: extractedData.profile,
+      experiences: extractedData.experiences || [],
+      education: extractedData.education || [],
+      skills: extractedData.skills || [],
+      projects: extractedData.projects || [],
+      certifications: extractedData.certifications || [],
+      achievements: extractedData.achievements || [],
+      publications: extractedData.publications || [],
+      socialLinks: extractedData.socialLinks || [],
+      rawCvText: rawText,
+      originalCvFileName: file.originalname,
+      originalCvFileUrl: fileUrl,
+    });
+
+    res.json({
+      success: true,
+      message: `Successfully stored ${file.originalname} as default and replaced all profile data.`,
+      originalFileName: file.originalname,
+      originalFileUrl: fileUrl,
+      extractedData,
+      fullProfile,
+    });
+  } catch (err: any) {
+    console.error('Replace PDF endpoint error:', err);
+    res.status(500).json({ error: err.message || 'Failed to replace PDF' });
+  }
+});
+
+// Stage 1: Upload and Parse CV -> Returns extracted data for USER REVIEW
 router.post('/cv/upload', upload.single('file'), async (req: Request, res: Response) => {
   try {
     const userId = getAuthUserId(req) || 'usr_user';
@@ -132,6 +222,10 @@ router.post('/cv/upload', upload.single('file'), async (req: Request, res: Respo
     }
 
     const file = req.file;
+
+    // Clean up previous files if any
+    cleanupOldUserFiles(userId);
+
     let rawText = '';
     try {
       rawText = await parseDocumentBuffer(file.buffer, file.mimetype, file.originalname);
@@ -145,7 +239,7 @@ router.post('/cv/upload', upload.single('file'), async (req: Request, res: Respo
       rawText = `Uploaded document: ${file.originalname} (${(file.size / 1024).toFixed(1)} KB). Please extract all standard CV and resume sections from this file.`;
     }
 
-    // Save physical file record for history
+    // Save physical file record
     const savedFileName = `${Date.now()}_${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     const filePath = path.join(UPLOADS_DIR, savedFileName);
     fs.writeFileSync(filePath, file.buffer);
@@ -177,14 +271,16 @@ router.post('/cv/upload', upload.single('file'), async (req: Request, res: Respo
 // Stage 2: User Confirms Reviewed & Edited Data -> Commits to Profile
 router.post('/cv/commit', (req: Request, res: Response) => {
   try {
-    const userId = getAuthUserId(req);
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
+    const userId = getAuthUserId(req) || 'usr_user';
 
     const data = req.body;
     if (!data || !data.profile) {
       return res.status(400).json({ error: 'Invalid profile data payload' });
+    }
+
+    // If a new originalCvFileUrl is provided, clean up older files
+    if (data.originalCvFileUrl) {
+      cleanupOldUserFiles(userId, data.originalCvFileUrl);
     }
 
     const fullProfile = db.commitExtractedCV(userId, {
@@ -204,12 +300,32 @@ router.post('/cv/commit', (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      message: 'CV data successfully confirmed and saved.',
+      message: 'CV data successfully confirmed and stored as default.',
       fullProfile,
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Get Active Default PDF for Current User
+router.get('/cv/active-pdf', (req: Request, res: Response) => {
+  const userId = getAuthUserId(req);
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+  const profile = db.getProfileByUserId(userId);
+  if (!profile || !profile.originalCvFileUrl) {
+    return res.status(404).json({ error: 'No default PDF found' });
+  }
+
+  const filename = path.basename(profile.originalCvFileUrl);
+  const filePath = path.join(UPLOADS_DIR, filename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'Stored PDF file missing from disk' });
+  }
+
+  res.setHeader('Content-Disposition', `inline; filename="${profile.originalCvFileName || 'cv.pdf'}"`);
+  res.sendFile(filePath);
 });
 
 // ----------------------------------------------------
