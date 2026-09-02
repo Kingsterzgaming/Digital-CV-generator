@@ -14,6 +14,7 @@ import type {
   TemplateConfig,
   AnalyticsSummary,
   CVDiffResult,
+  AIKeyPoolStatus,
 } from '../types/index.ts';
 
 class ApiClient {
@@ -497,6 +498,73 @@ class ApiClient {
       body: formData,
     });
     if (!res.ok) throw new Error('Failed to upload file');
+    return res.json();
+  }
+
+  // --- AI Key Pool & Diagnostics ---
+  async getAIKeyPoolStatus(): Promise<AIKeyPoolStatus> {
+    const res = await fetch('/api/ai/keys/status');
+    if (!res.ok) throw new Error('Failed to fetch AI key status');
+    return res.json();
+  }
+
+  async testAIKeys(keyId?: string): Promise<{
+    tested?: number;
+    result?: { success: boolean; latencyMs?: number; message: string };
+    results?: Record<string, { success: boolean; latencyMs?: number; message: string }>;
+    poolStatus: AIKeyPoolStatus;
+  }> {
+    const res = await fetch('/api/ai/keys/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keyId }),
+    });
+    if (!res.ok) throw new Error('Failed to test AI key');
+    return res.json();
+  }
+
+  async switchActiveAIKey(keyId: string): Promise<{ result: { success: boolean; message: string }; poolStatus: AIKeyPoolStatus }> {
+    const res = await fetch('/api/ai/keys/switch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keyId }),
+    });
+    if (!res.ok) throw new Error('Failed to switch AI key');
+    return res.json();
+  }
+
+  async addCustomAIKey(key: string, name?: string): Promise<{
+    addResult: { success: boolean; key?: any; message: string };
+    testResult?: { success: boolean; latencyMs?: number; message: string };
+    poolStatus: AIKeyPoolStatus;
+  }> {
+    const res = await fetch('/api/ai/keys/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, name }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to add AI key');
+    }
+    return res.json();
+  }
+
+  async removeCustomAIKey(keyId: string): Promise<{ result: { success: boolean; message: string }; poolStatus: AIKeyPoolStatus }> {
+    const res = await fetch(`/api/ai/keys/${encodeURIComponent(keyId)}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to remove AI key');
+    return res.json();
+  }
+
+  async resetAIKeyStatus(keyId?: string): Promise<{ result: { success: boolean; message: string }; poolStatus: AIKeyPoolStatus }> {
+    const res = await fetch('/api/ai/keys/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keyId }),
+    });
+    if (!res.ok) throw new Error('Failed to reset AI key statuses');
     return res.json();
   }
 }

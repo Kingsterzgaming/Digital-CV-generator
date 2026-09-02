@@ -16,6 +16,7 @@ import { OnboardingFlow } from './components/onboarding/OnboardingFlow.tsx';
 import { PublicCVPage } from './components/public/PublicCVPage.tsx';
 import { JobTailorModal } from './components/dashboard/JobTailorModal.tsx';
 import { CVReimportModal } from './components/dashboard/CVReimportModal.tsx';
+import { AIKeyManagerModal } from './components/dashboard/AIKeyManagerModal.tsx';
 import {
   Sparkles,
   ArrowRight,
@@ -36,6 +37,7 @@ function AppContent() {
   const [isOnboarding, setIsOnboarding] = useState<boolean>(false);
   const [showTailorModal, setShowTailorModal] = useState<boolean>(false);
   const [showReimportModal, setShowReimportModal] = useState<boolean>(false);
+  const [showAIKeysModal, setShowAIKeysModal] = useState<boolean>(false);
   const [publicUrlUsername, setPublicUrlUsername] = useState<string | null>(null);
 
   // Check URL query or path for direct public CV viewing (e.g. /cv/:username)
@@ -120,6 +122,7 @@ function AppContent() {
         onOpenPreview={() => setIsViewingPublic(true)}
         onOpenReimport={() => setShowReimportModal(true)}
         onOpenTailor={() => setShowTailorModal(true)}
+        onOpenAIKeys={() => setShowAIKeysModal(true)}
       />
 
       {/* Main Container with Sticky Sidebar */}
@@ -130,6 +133,7 @@ function AppContent() {
           onSelectView={setCurrentView}
           onOpenReimport={() => setShowReimportModal(true)}
           onOpenTailor={() => setShowTailorModal(true)}
+          onOpenAIKeys={() => setShowAIKeysModal(true)}
         />
 
         {/* Viewport Content Area */}
@@ -165,6 +169,11 @@ function AppContent() {
       <CVReimportModal
         isOpen={showReimportModal}
         onClose={() => setShowReimportModal(false)}
+      />
+
+      <AIKeyManagerModal
+        isOpen={showAIKeysModal}
+        onClose={() => setShowAIKeysModal(false)}
       />
     </div>
   );

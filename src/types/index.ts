@@ -305,3 +305,32 @@ export interface FullProfileData {
   socialLinks: SocialLink[];
   versions: CVVersion[];
 }
+
+export type AIKeyStatus = 'active' | 'healthy' | 'exhausted' | 'error' | 'untested';
+
+export interface AIKeyEntry {
+  id: string;
+  name: string;
+  masked: string;
+  source: 'env' | 'custom';
+  status: AIKeyStatus;
+  isActive: boolean;
+  failureCount: number;
+  successCount: number;
+  totalCalls: number;
+  lastUsedAt?: string;
+  lastTestedAt?: string;
+  lastError?: string;
+  latencyMs?: number;
+  cooldownRemainingSeconds?: number;
+}
+
+export interface AIKeyPoolStatus {
+  activeKeyId: string | null;
+  totalKeys: number;
+  healthyKeys: number;
+  exhaustedKeys: number;
+  errorKeys: number;
+  isFallbackMode: boolean;
+  keys: AIKeyEntry[];
+}

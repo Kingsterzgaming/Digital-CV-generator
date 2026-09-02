@@ -1,26 +1,6 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import type { FullProfileData } from '../types/index.ts';
-
-let aiClient: GoogleGenAI | null = null;
-
-function getAIClient(): GoogleGenAI | null {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.warn('GEMINI_API_KEY not configured. AI operations will use heuristic fallbacks.');
-    return null;
-  }
-  if (!aiClient) {
-    aiClient = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        },
-      },
-    });
-  }
-  return aiClient;
-}
+import { aiKeyPool } from './aiKeyPool.ts';
 
 export interface ExtractedCVStructured {
   profile: {
@@ -112,12 +92,6 @@ export async function extractStructuredCV(
   mimeType?: string,
   fileName?: string
 ): Promise<ExtractedCVStructured> {
-  const client = getAIClient();
-
-  if (!client) {
-    return heuristicExtractCV(rawCvText);
-  }
-
   const prompt = `You are a world-class, exhaustive CV and Resume parsing engine.
 Your task is to parse the provided CV/Resume with 100% completeness, zero omissions, and high precision into a structured JSON representation.
 
@@ -153,175 +127,176 @@ ${rawCvText ? rawCvText.slice(0, 45000) : 'See attached document binary'}
 
 Return a JSON object conforming strictly to the requested schema.`;
 
-  try {
-    const contents: any[] = [];
-    if (fileBuffer && (mimeType === 'application/pdf' || fileName?.toLowerCase().endsWith('.pdf') || mimeType?.includes('image'))) {
-      contents.push({
-        inlineData: {
-          data: fileBuffer.toString('base64'),
-          mimeType: mimeType || 'application/pdf',
-        },
-      });
-    }
-    contents.push(prompt);
+  return aiKeyPool.executeWithFailover(
+    'CV Structured Extraction',
+    async (client: GoogleGenAI) => {
+      const contents: any[] = [];
+      if (fileBuffer && (mimeType === 'application/pdf' || fileName?.toLowerCase().endsWith('.pdf') || mimeType?.includes('image'))) {
+        contents.push({
+          inlineData: {
+            data: fileBuffer.toString('base64'),
+            mimeType: mimeType || 'application/pdf',
+          },
+        });
+      }
+      contents.push(prompt);
 
-    const response = await client.models.generateContent({
-      model: 'gemini-3.7-flash',
-      contents: contents.length === 1 ? prompt : contents,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            profile: {
-              type: Type.OBJECT,
-              properties: {
-                fullName: { type: Type.STRING },
-                headline: { type: Type.STRING },
-                summary: { type: Type.STRING },
-                email: { type: Type.STRING },
-                phone: { type: Type.STRING },
-                location: { type: Type.STRING },
-              },
-              required: ['fullName'],
-            },
-            experiences: {
-              type: Type.ARRAY,
-              items: {
+      const response = await client.models.generateContent({
+        model: 'gemini-3.7-flash',
+        contents: contents.length === 1 ? prompt : contents,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              profile: {
                 type: Type.OBJECT,
                 properties: {
-                  company: { type: Type.STRING },
-                  role: { type: Type.STRING },
+                  fullName: { type: Type.STRING },
+                  headline: { type: Type.STRING },
+                  summary: { type: Type.STRING },
+                  email: { type: Type.STRING },
+                  phone: { type: Type.STRING },
                   location: { type: Type.STRING },
-                  type: { type: Type.STRING },
-                  startDate: { type: Type.STRING },
-                  endDate: { type: Type.STRING },
-                  isCurrent: { type: Type.BOOLEAN },
-                  description: { type: Type.STRING },
-                  highlights: { type: Type.ARRAY, items: { type: Type.STRING } },
-                  technologies: { type: Type.ARRAY, items: { type: Type.STRING } },
                 },
-                required: ['company', 'role'],
+                required: ['fullName'],
               },
-            },
-            education: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  institution: { type: Type.STRING },
-                  degree: { type: Type.STRING },
-                  fieldOfStudy: { type: Type.STRING },
-                  location: { type: Type.STRING },
-                  startDate: { type: Type.STRING },
-                  endDate: { type: Type.STRING },
-                  isCurrent: { type: Type.BOOLEAN },
-                  gpa: { type: Type.STRING },
-                  honors: { type: Type.STRING },
-                  courses: { type: Type.ARRAY, items: { type: Type.STRING } },
+              experiences: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    company: { type: Type.STRING },
+                    role: { type: Type.STRING },
+                    location: { type: Type.STRING },
+                    type: { type: Type.STRING },
+                    startDate: { type: Type.STRING },
+                    endDate: { type: Type.STRING },
+                    isCurrent: { type: Type.BOOLEAN },
+                    description: { type: Type.STRING },
+                    highlights: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    technologies: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  },
+                  required: ['company', 'role'],
                 },
-                required: ['institution'],
               },
-            },
-            skills: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  name: { type: Type.STRING },
-                  category: { type: Type.STRING },
-                  proficiency: { type: Type.STRING },
-                  yearsOfExperience: { type: Type.NUMBER },
-                  highlighted: { type: Type.BOOLEAN },
+              education: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    institution: { type: Type.STRING },
+                    degree: { type: Type.STRING },
+                    fieldOfStudy: { type: Type.STRING },
+                    location: { type: Type.STRING },
+                    startDate: { type: Type.STRING },
+                    endDate: { type: Type.STRING },
+                    isCurrent: { type: Type.BOOLEAN },
+                    gpa: { type: Type.STRING },
+                    honors: { type: Type.STRING },
+                    courses: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  },
+                  required: ['institution'],
                 },
-                required: ['name'],
               },
-            },
-            projects: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  title: { type: Type.STRING },
-                  tagline: { type: Type.STRING },
-                  description: { type: Type.STRING },
-                  role: { type: Type.STRING },
-                  technologies: { type: Type.ARRAY, items: { type: Type.STRING } },
-                  githubUrl: { type: Type.STRING },
-                  liveUrl: { type: Type.STRING },
-                  startDate: { type: Type.STRING },
-                  endDate: { type: Type.STRING },
-                  featured: { type: Type.BOOLEAN },
+              skills: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    category: { type: Type.STRING },
+                    proficiency: { type: Type.STRING },
+                    yearsOfExperience: { type: Type.NUMBER },
+                    highlighted: { type: Type.BOOLEAN },
+                  },
+                  required: ['name'],
                 },
-                required: ['title'],
               },
-            },
-            certifications: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  name: { type: Type.STRING },
-                  issuer: { type: Type.STRING },
-                  issueDate: { type: Type.STRING },
-                  expiryDate: { type: Type.STRING },
-                  credentialId: { type: Type.STRING },
-                  credentialUrl: { type: Type.STRING },
+              projects: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    tagline: { type: Type.STRING },
+                    description: { type: Type.STRING },
+                    role: { type: Type.STRING },
+                    technologies: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    githubUrl: { type: Type.STRING },
+                    liveUrl: { type: Type.STRING },
+                    startDate: { type: Type.STRING },
+                    endDate: { type: Type.STRING },
+                    featured: { type: Type.BOOLEAN },
+                  },
+                  required: ['title'],
                 },
-                required: ['name'],
               },
-            },
-            achievements: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  title: { type: Type.STRING },
-                  description: { type: Type.STRING },
-                  date: { type: Type.STRING },
-                  issuer: { type: Type.STRING },
+              certifications: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING },
+                    issuer: { type: Type.STRING },
+                    issueDate: { type: Type.STRING },
+                    expiryDate: { type: Type.STRING },
+                    credentialId: { type: Type.STRING },
+                    credentialUrl: { type: Type.STRING },
+                  },
+                  required: ['name'],
                 },
-                required: ['title'],
               },
-            },
-            publications: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  title: { type: Type.STRING },
-                  publisher: { type: Type.STRING },
-                  publishedDate: { type: Type.STRING },
-                  url: { type: Type.STRING },
-                  description: { type: Type.STRING },
-                  authors: { type: Type.STRING },
+              achievements: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    description: { type: Type.STRING },
+                    date: { type: Type.STRING },
+                    issuer: { type: Type.STRING },
+                  },
+                  required: ['title'],
                 },
-                required: ['title'],
               },
-            },
-            socialLinks: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  platform: { type: Type.STRING },
-                  label: { type: Type.STRING },
-                  url: { type: Type.STRING },
+              publications: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    publisher: { type: Type.STRING },
+                    publishedDate: { type: Type.STRING },
+                    url: { type: Type.STRING },
+                    description: { type: Type.STRING },
+                    authors: { type: Type.STRING },
+                  },
+                  required: ['title'],
                 },
-                required: ['platform', 'url'],
+              },
+              socialLinks: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    platform: { type: Type.STRING },
+                    label: { type: Type.STRING },
+                    url: { type: Type.STRING },
+                  },
+                  required: ['platform', 'url'],
+                },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    const parsed = JSON.parse(response.text || '{}');
-    return sanitizeExtractedData(parsed);
-  } catch (err) {
-    console.error('Gemini CV extraction error, using enhanced fallback:', err);
-    return heuristicExtractCV(rawCvText);
-  }
+      const parsed = JSON.parse(response.text || '{}');
+      return sanitizeExtractedData(parsed);
+    },
+    () => heuristicExtractCV(rawCvText)
+  );
 }
 
 function sanitizeExtractedData(data: any): ExtractedCVStructured {
@@ -752,7 +727,6 @@ export async function answerRecruiterQuery(params: {
   versionSlug?: string;
   chatHistory?: { role: string; content: string }[];
 }): Promise<{ answer: string; sources: string[] }> {
-  const client = getAIClient();
   const { query, candidateProfile, versionSlug, chatHistory } = params;
 
   // Find active version
@@ -813,8 +787,7 @@ export async function answerRecruiterQuery(params: {
     publications: candidateProfile.publications.map(pub => `${pub.title} (${pub.publisher || ''})`),
   };
 
-  if (!client) {
-    // Grounded heuristic search
+  const getHeuristicFallback = () => {
     const lowerQ = query.toLowerCase();
     const sources: string[] = [];
     let answer = `Regarding ${profileContext.name}'s profile:\n\n`;
@@ -840,7 +813,7 @@ export async function answerRecruiterQuery(params: {
     }
 
     return { answer, sources };
-  }
+  };
 
   const systemInstruction = `You are the AI Recruiter Assistant embedded in ${profileContext.name}'s DigitalCV portfolio.
 Your role is to help recruiters, hiring managers, and interviewers evaluate this candidate by answering questions accurately.
@@ -859,34 +832,32 @@ STRICT GROUNDING DIRECTIVES:
     `Recruiter: ${query}`,
   ].join('\n\n');
 
-  try {
-    const response = await client.models.generateContent({
-      model: 'gemini-3.7-flash',
-      contents: conversation,
-      config: {
-        systemInstruction,
-        temperature: 0.2,
-      },
-    });
+  return aiKeyPool.executeWithFailover(
+    'Recruiter Assistant Chat',
+    async (client: GoogleGenAI) => {
+      const response = await client.models.generateContent({
+        model: 'gemini-3.7-flash',
+        contents: conversation,
+        config: {
+          systemInstruction,
+          temperature: 0.2,
+        },
+      });
 
-    const fullText = response.text || 'Information is not available in the candidate profile.';
-    const sourceMatch = fullText.match(/\[SOURCES:\s*(.*?)\]/i);
-    let sources: string[] = ['Profile Database'];
-    let cleanAnswer = fullText;
+      const fullText = response.text || 'Information is not available in the candidate profile.';
+      const sourceMatch = fullText.match(/\[SOURCES:\s*(.*?)\]/i);
+      let sources: string[] = ['Profile Database'];
+      let cleanAnswer = fullText;
 
-    if (sourceMatch) {
-      sources = sourceMatch[1].split(',').map(s => s.trim()).filter(Boolean);
-      cleanAnswer = fullText.replace(/\[SOURCES:\s*.*?\]/i, '').trim();
-    }
+      if (sourceMatch) {
+        sources = sourceMatch[1].split(',').map(s => s.trim()).filter(Boolean);
+        cleanAnswer = fullText.replace(/\[SOURCES:\s*.*?\]/i, '').trim();
+      }
 
-    return { answer: cleanAnswer, sources };
-  } catch (err) {
-    console.error('Recruiter chat AI error:', err);
-    return {
-      answer: `Based on ${profileContext.name}'s confirmed profile data: ${profileContext.summary}. (Note: AI service is currently responding in direct database mode).`,
-      sources: ['Database Profile'],
-    };
-  }
+      return { answer: cleanAnswer, sources };
+    },
+    getHeuristicFallback
+  );
 }
 
 // AI Polish / Refinement for User Review
@@ -895,12 +866,11 @@ export async function improveText(params: {
   type: 'summary' | 'project' | 'experience' | 'headline';
   context?: string;
 }): Promise<{ improved: string; rationale: string }> {
-  const client = getAIClient();
   const { text, type, context } = params;
 
-  if (!client || !text.trim()) {
+  if (!text || !text.trim()) {
     return {
-      improved: text.trim(),
+      improved: (text || '').trim(),
       rationale: 'Original text maintained.',
     };
   }
@@ -918,32 +888,33 @@ Output a JSON object with:
 - "improved": the polished text
 - "rationale": one sentence explaining the enhancements made (e.g. "Enhanced active verbs and readability")`;
 
-  try {
-    const response = await client.models.generateContent({
-      model: 'gemini-3.7-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            improved: { type: Type.STRING },
-            rationale: { type: Type.STRING },
+  return aiKeyPool.executeWithFailover(
+    'AI Text Enhancement',
+    async (client: GoogleGenAI) => {
+      const response = await client.models.generateContent({
+        model: 'gemini-3.7-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              improved: { type: Type.STRING },
+              rationale: { type: Type.STRING },
+            },
+            required: ['improved', 'rationale'],
           },
-          required: ['improved', 'rationale'],
         },
-      },
-    });
+      });
 
-    const res = JSON.parse(response.text || '{}');
-    return {
-      improved: res.improved || text,
-      rationale: res.rationale || 'Enhanced formatting and tone.',
-    };
-  } catch (err) {
-    console.error('AI improvement error:', err);
-    return { improved: text, rationale: 'Original preserved' };
-  }
+      const res = JSON.parse(response.text || '{}');
+      return {
+        improved: res.improved || text,
+        rationale: res.rationale || 'Enhanced formatting and tone.',
+      };
+    },
+    () => ({ improved: text, rationale: 'Original text preserved.' })
+  );
 }
 
 // Tailor Profile Content to Job Description
@@ -960,7 +931,6 @@ export async function tailorToJobDescription(params: {
   recommendedSkillIds: string[];
   actionableTips: string[];
 }> {
-  const client = getAIClient();
   const { profileData, jobDescription } = params;
 
   const candidateSummary = {
@@ -970,19 +940,6 @@ export async function tailorToJobDescription(params: {
     projects: profileData.projects.map(p => ({ id: p.id, title: p.title, tech: p.technologies, desc: p.description })),
     experiences: profileData.experiences.map(e => ({ id: e.id, role: e.role, company: e.company, highlights: e.highlights })),
   };
-
-  if (!client) {
-    return {
-      matchScore: 82,
-      matchingSkills: profileData.skills.slice(0, 5).map(s => s.name),
-      missingSkills: ['Kubernetes', 'GraphQL'],
-      suggestedHeadline: `${profileData.profile.headline} (Targeted)`,
-      suggestedSummary: profileData.profile.summary,
-      recommendedProjectIds: profileData.projects.slice(0, 2).map(p => p.id),
-      recommendedSkillIds: profileData.skills.slice(0, 6).map(s => s.id),
-      actionableTips: ['Emphasize recent full-stack leadership', 'Highlight cloud deployment metrics'],
-    };
-  }
 
   const prompt = `Analyze this candidate's profile against the Target Job Description.
 
@@ -997,41 +954,44 @@ CRITICAL: Do NOT fabricate experience or skills. Only suggest re-ordering or emp
 
 Return a JSON object with matchScore (0-100), matchingSkills, missingSkills, suggestedHeadline, suggestedSummary, recommendedProjectIds, recommendedSkillIds, and actionableTips.`;
 
-  try {
-    const response = await client.models.generateContent({
-      model: 'gemini-3.7-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            matchScore: { type: Type.NUMBER },
-            matchingSkills: { type: Type.ARRAY, items: { type: Type.STRING } },
-            missingSkills: { type: Type.ARRAY, items: { type: Type.STRING } },
-            suggestedHeadline: { type: Type.STRING },
-            suggestedSummary: { type: Type.STRING },
-            recommendedProjectIds: { type: Type.ARRAY, items: { type: Type.STRING } },
-            recommendedSkillIds: { type: Type.ARRAY, items: { type: Type.STRING } },
-            actionableTips: { type: Type.ARRAY, items: { type: Type.STRING } },
+  return aiKeyPool.executeWithFailover(
+    'Job Tailoring Analysis',
+    async (client: GoogleGenAI) => {
+      const response = await client.models.generateContent({
+        model: 'gemini-3.7-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              matchScore: { type: Type.NUMBER },
+              matchingSkills: { type: Type.ARRAY, items: { type: Type.STRING } },
+              missingSkills: { type: Type.ARRAY, items: { type: Type.STRING } },
+              suggestedHeadline: { type: Type.STRING },
+              suggestedSummary: { type: Type.STRING },
+              recommendedProjectIds: { type: Type.ARRAY, items: { type: Type.STRING } },
+              recommendedSkillIds: { type: Type.ARRAY, items: { type: Type.STRING } },
+              actionableTips: { type: Type.ARRAY, items: { type: Type.STRING } },
+            },
+            required: ['matchScore', 'matchingSkills', 'missingSkills', 'suggestedHeadline', 'suggestedSummary', 'actionableTips'],
           },
-          required: ['matchScore', 'matchingSkills', 'missingSkills', 'suggestedHeadline', 'suggestedSummary', 'actionableTips'],
         },
-      },
-    });
+      });
 
-    return JSON.parse(response.text || '{}');
-  } catch (err) {
-    console.error('Job tailoring error:', err);
-    return {
-      matchScore: 75,
-      matchingSkills: profileData.skills.slice(0, 4).map(s => s.name),
-      missingSkills: [],
-      suggestedHeadline: profileData.profile.headline,
-      suggestedSummary: profileData.profile.summary,
-      recommendedProjectIds: profileData.projects.map(p => p.id),
-      recommendedSkillIds: profileData.skills.map(s => s.id),
-      actionableTips: ['Review experience bullet points to match job keywords.'],
-    };
-  }
+      return JSON.parse(response.text || '{}');
+    },
+    () => {
+      return {
+        matchScore: 80,
+        matchingSkills: profileData.skills.slice(0, 5).map(s => s.name),
+        missingSkills: [],
+        suggestedHeadline: profileData.profile.headline,
+        suggestedSummary: profileData.profile.summary,
+        recommendedProjectIds: profileData.projects.slice(0, 3).map(p => p.id),
+        recommendedSkillIds: profileData.skills.slice(0, 6).map(s => s.id),
+        actionableTips: ['Ensure experience bullet points reflect the primary technical requirements.'],
+      };
+    }
+  );
 }

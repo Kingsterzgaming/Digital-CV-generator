@@ -32,6 +32,7 @@ interface SidebarProps {
   onSelectView: (view: DashboardView) => void;
   onOpenReimport: () => void;
   onOpenTailor: () => void;
+  onOpenAIKeys?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -39,6 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectView,
   onOpenReimport,
   onOpenTailor,
+  onOpenAIKeys,
 }) => {
   const { fullProfile } = useAuth();
 
@@ -127,6 +129,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <p className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
             AI Operations
           </p>
+          {onOpenAIKeys && (
+            <button
+              onClick={onOpenAIKeys}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium bg-neutral-900/60 border border-neutral-800 hover:border-amber-500/50 text-neutral-300 hover:text-white transition-colors"
+            >
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>AI Key Switcher</span>
+              </div>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-800 font-mono">
+                Pool
+              </span>
+            </button>
+          )}
           <button
             onClick={onOpenTailor}
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium bg-neutral-900/60 border border-neutral-800 hover:border-indigo-500/50 text-neutral-300 hover:text-white transition-colors"

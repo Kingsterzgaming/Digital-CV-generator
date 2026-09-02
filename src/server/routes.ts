@@ -6,6 +6,7 @@ import QRCode from 'qrcode';
 import { db } from './db.ts';
 import { parseDocumentBuffer } from './parser.ts';
 import { extractStructuredCV, answerRecruiterQuery, improveText, tailorToJobDescription } from './ai.ts';
+import { aiKeyPool } from './aiKeyPool.ts';
 import type { FullProfileData, TemplateConfig } from '../types/index.ts';
 
 const router = Router();
@@ -838,6 +839,95 @@ router.post('/ai/tailor', async (req: Request, res: Response) => {
 
     const analysis = await tailorToJobDescription({ profileData, jobDescription });
     res.json(analysis);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// AI Key Pool, Switcher & Diagnostics Endpoints
+router.get('/ai/keys/status', (req: Request, res: Response) => {
+  try {
+    const status = aiKeyPool.getPoolStatus();
+    res.json(status);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/ai/keys/test', async (req: Request, res: Response) => {
+  try {
+    const { keyId } = req.body;
+    if (keyId) {
+      const result = await aiKeyPool.testKey(keyId);
+      const poolStatus = aiKeyPool.getPoolStatus();
+      res.json({ result, poolStatus });
+    } else {
+      const results = await aiKeyPool.testAllKeys();
+      const poolStatus = aiKeyPool.getPoolStatus();
+      res.json({ ...results, poolStatus });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/ai/keys/switch', (req: Request, res: Response) => {
+  try {
+    const { keyId } = req.body;
+    if (!keyId) return res.status(400).json({ error: 'keyId is required' });
+
+    const result = aiKeyPool.setActiveKey(keyId);
+    if (!result.success) return res.status(404).json({ error: result.message });
+
+    const poolStatus = aiKeyPool.getPoolStatus();
+    res.json({ result, poolStatus });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/ai/keys/add', async (req: Request, res: Response) => {
+  try {
+    const { key, name } = req.body;
+    if (!key || !key.trim()) return res.status(400).json({ error: 'API key is required' });
+
+    const addResult = aiKeyPool.addCustomKey(key, name);
+    if (!addResult.success) {
+      return res.status(400).json({ error: addResult.message });
+    }
+
+    // Auto-test the newly added key
+    let testResult;
+    if (addResult.key) {
+      testResult = await aiKeyPool.testKey(addResult.key.id);
+    }
+
+    const poolStatus = aiKeyPool.getPoolStatus();
+    res.json({ addResult, testResult, poolStatus });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/ai/keys/:keyId', (req: Request, res: Response) => {
+  try {
+    const { keyId } = req.params;
+    const result = aiKeyPool.removeCustomKey(keyId);
+    if (!result.success) return res.status(404).json({ error: result.message });
+
+    const poolStatus = aiKeyPool.getPoolStatus();
+    res.json({ result, poolStatus });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/ai/keys/reset', (req: Request, res: Response) => {
+  try {
+    const { keyId } = req.body;
+    const result = aiKeyPool.resetKeyStatus(keyId);
+    const poolStatus = aiKeyPool.getPoolStatus();
+    res.json({ result, poolStatus });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

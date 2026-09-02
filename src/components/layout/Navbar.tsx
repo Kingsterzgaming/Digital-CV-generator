@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ExternalLink,
   Eye,
@@ -11,23 +11,35 @@ import {
   Globe,
   Trash2,
   Upload,
+  Zap,
+  Key,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.tsx';
+import { api } from '../../lib/api.ts';
 
 interface NavbarProps {
   onOpenPreview: () => void;
   onOpenReimport: () => void;
   onOpenTailor: () => void;
+  onOpenAIKeys: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenPreview,
   onOpenReimport,
   onOpenTailor,
+  onOpenAIKeys,
 }) => {
   const { user, fullProfile, resetAllData, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
   const [isResetting, setIsResetting] = useState<boolean>(false);
+  const [keyCount, setKeyCount] = useState<{ total: number; healthy: number }>({ total: 1, healthy: 1 });
+
+  useEffect(() => {
+    api.getAIKeyPoolStatus().then(status => {
+      setKeyCount({ total: status.totalKeys, healthy: status.healthyKeys });
+    }).catch(() => {});
+  }, []);
 
   const handleResetData = async () => {
     if (window.confirm('Are you sure you want to reset and clear all CV data? This will clear all entries to a blank slate.')) {
@@ -62,6 +74,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Center Action Shortcuts */}
       <div className="hidden md:flex items-center gap-2">
+        {/* AI Key Switcher & Status Pill */}
+        <button
+          onClick={onOpenAIKeys}
+          className="px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-indigo-500/60 text-neutral-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+          title="Open AI Engine & API Key Pool Manager"
+        >
+          <Zap className="w-3.5 h-3.5 text-amber-400" />
+          <span>AI Engine</span>
+          <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-950 text-indigo-300 font-mono">
+            {keyCount.healthy}/{keyCount.total} Keys
+          </span>
+        </button>
+
         <button
           onClick={onOpenTailor}
           className="px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-indigo-500/60 text-neutral-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
@@ -81,6 +106,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-3">
+        {/* AI Keys button on mobile */}
+        <button
+          onClick={onOpenAIKeys}
+          className="md:hidden p-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-amber-400"
+          title="AI Key Pool"
+        >
+          <Zap className="w-4 h-4" />
+        </button>
+
         {/* Live Public CV Preview Link */}
         <button
           onClick={onOpenPreview}
@@ -112,7 +146,21 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               <div className="py-1">
                 <button
-                  onClick={onOpenReimport}
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    onOpenAIKeys();
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800 text-neutral-300 flex items-center gap-2"
+                >
+                  <Key className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Manage AI API Keys & Pool</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    onOpenReimport();
+                  }}
                   className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800 text-neutral-300 flex items-center gap-2"
                 >
                   <Upload className="w-3.5 h-3.5 text-indigo-400" />
@@ -135,3 +183,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+
