@@ -639,7 +639,17 @@ router.delete('/publications/:id', (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
-// Social Links Save
+// Social Links
+router.get('/social-links', (req: Request, res: Response) => {
+  const userId = getAuthUserId(req);
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  const profile = db.getProfileByUserId(userId);
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+  const links = db.getSocialLinks(profile.id);
+  res.json({ links, success: true });
+});
+
 router.put('/social-links', (req: Request, res: Response) => {
   const userId = getAuthUserId(req);
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
@@ -647,7 +657,7 @@ router.put('/social-links', (req: Request, res: Response) => {
   if (!profile) return res.status(404).json({ error: 'Profile not found' });
 
   const updated = db.saveSocialLinks(profile.id, req.body.links || []);
-  res.json({ links: updated });
+  res.json({ links: updated, success: true, message: 'Social media links saved to database JSON file' });
 });
 
 // CV Versions CRUD

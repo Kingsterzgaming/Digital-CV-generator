@@ -10,9 +10,27 @@ export interface User {
 
 export interface SocialLink {
   id: string;
-  platform: 'github' | 'linkedin' | 'twitter' | 'portfolio' | 'youtube' | 'dribbble' | 'other';
+  platform:
+    | 'github'
+    | 'linkedin'
+    | 'twitter'
+    | 'x'
+    | 'portfolio'
+    | 'youtube'
+    | 'dribbble'
+    | 'medium'
+    | 'discord'
+    | 'instagram'
+    | 'twitch'
+    | 'substack'
+    | 'telegram'
+    | 'leetcode'
+    | 'codeforces'
+    | 'other'
+    | string;
   label: string;
   url: string;
+  username?: string;
 }
 
 export interface Experience {

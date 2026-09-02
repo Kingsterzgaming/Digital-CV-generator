@@ -4,6 +4,7 @@ import { Navbar } from './components/layout/Navbar.tsx';
 import { Sidebar, type DashboardView } from './components/layout/Sidebar.tsx';
 import { DashboardOverview } from './components/dashboard/DashboardOverview.tsx';
 import { ProfileEditor } from './components/dashboard/ProfileEditor.tsx';
+import { SocialLinksManager } from './components/dashboard/SocialLinksManager.tsx';
 import { ExperienceManager } from './components/dashboard/ExperienceManager.tsx';
 import { ProjectManager } from './components/dashboard/ProjectManager.tsx';
 import { SkillsManager } from './components/dashboard/SkillsManager.tsx';
@@ -147,6 +148,7 @@ function AppContent() {
             />
           )}
           {currentView === 'profile' && <ProfileEditor />}
+          {currentView === 'social' && <SocialLinksManager />}
           {currentView === 'experience' && <ExperienceManager />}
           {currentView === 'projects' && <ProjectManager />}
           {currentView === 'skills' && <SkillsManager />}

@@ -332,12 +332,19 @@ class ApiClient {
   }
 
   // --- Social Links ---
-  async saveSocialLinks(links: SocialLink[]): Promise<{ links: SocialLink[] }> {
+  async getSocialLinks(): Promise<{ links: SocialLink[]; success?: boolean }> {
+    const res = await fetch('/api/social-links', { headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch social links');
+    return res.json();
+  }
+
+  async saveSocialLinks(links: SocialLink[]): Promise<{ links: SocialLink[]; success?: boolean; message?: string }> {
     const res = await fetch('/api/social-links', {
       method: 'PUT',
       headers: this.getHeaders(),
       body: JSON.stringify({ links }),
     });
+    if (!res.ok) throw new Error('Failed to save social links');
     return res.json();
   }
 

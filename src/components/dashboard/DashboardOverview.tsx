@@ -333,8 +333,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </div>
 
       {/* Grid: Core Database Metrics & Quick Navigation */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
+          {
+            label: 'Social & Web Links',
+            count: (fullProfile?.socialLinks || []).length,
+            view: 'social',
+            icon: Share2,
+            color: 'text-pink-400',
+          },
           {
             label: 'Experience Entries',
             count: experiences.length,

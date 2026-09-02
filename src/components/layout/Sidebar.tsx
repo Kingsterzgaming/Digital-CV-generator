@@ -2,6 +2,7 @@ import React from 'react';
 import {
   LayoutDashboard,
   User,
+  Share2,
   Briefcase,
   FolderGit2,
   Wrench,
@@ -18,6 +19,7 @@ import { useAuth } from '../../context/AuthContext.tsx';
 export type DashboardView =
   | 'overview'
   | 'profile'
+  | 'social'
   | 'experience'
   | 'projects'
   | 'skills'
@@ -47,6 +49,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'profile', label: 'Bio & Contact', icon: User },
+    {
+      id: 'social',
+      label: 'Social & Web Links',
+      icon: Share2,
+      count: fullProfile?.socialLinks?.length,
+    },
     {
       id: 'experience',
       label: 'Work Experience',

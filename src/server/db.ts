@@ -638,8 +638,12 @@ class Database {
   }
 
   // Social Links
+  getSocialLinks(profileId: string): SocialLink[] {
+    return this.data.socialLinks.filter(s => (s as any).profileId === profileId || (!('profileId' in s) && profileId === 'prf_user') || s.id.startsWith(profileId));
+  }
+
   saveSocialLinks(profileId: string, links: SocialLink[]): SocialLink[] {
-    this.data.socialLinks = this.data.socialLinks.filter(s => (s as any).profileId !== profileId);
+    this.data.socialLinks = this.data.socialLinks.filter(s => (s as any).profileId !== profileId && !s.id.startsWith(profileId));
     const updated = links.map(l => ({
       ...l,
       id: l.id || `soc_${crypto.randomUUID().slice(0, 8)}`,
